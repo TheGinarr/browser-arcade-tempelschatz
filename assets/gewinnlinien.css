@@ -9,7 +9,6 @@
      4. Schmale Screens und reduzierte Bewegung
    ============================================================ */
 
-
 /* ---------- 1. Layout ---------------------------------------------
    Ein Grid mit drei Spalten: Tabs | Walzenfenster | Tabs. Die Tab-Spalten haben feste
    Breite, das Fenster bekommt den Rest (minmax(0,1fr) lässt es auch unter seine Inhaltsbreite
@@ -17,81 +16,202 @@
    (--fenster-max, pro Spiel in spiel.css gesetzt) plus beide Tab-Spalten ergibt die Breite des Ganzen.
    --fv ist der Abstand von Fensterrand bis zu den Walzen (Rahmen + Polster): Die Tabs verteilen sich
    exakt über die Höhe der Walzen. */
-.fenster-zeile{
-  --tab-b:28px;--tab-h:24px;--tab-abstand:8px;--fv:12px;--fenster-max:620px;
-  display:grid;grid-template-columns:var(--tab-b) minmax(0,1fr) var(--tab-b);column-gap:var(--tab-abstand);
-  width:100%;max-width:calc(var(--fenster-max) + 2 * (var(--tab-b) + var(--tab-abstand)));
-  margin:4px auto 0;
+.fenster-zeile {
+  --tab-b: 28px;
+  --tab-h: 24px;
+  --tab-abstand: 8px;
+  --fv: 12px;
+  --fenster-max: 620px;
+  display: grid;
+  grid-template-columns: var(--tab-b) minmax(0, 1fr) var(--tab-b);
+  column-gap: var(--tab-abstand);
+  width: 100%;
+  max-width: calc(var(--fenster-max) + 2 * (var(--tab-b) + var(--tab-abstand)));
+  margin: 4px auto 0;
 }
 /* Das Fenster füllt seine Spalte (seine eigenen Randabstände und die Maximalbreite gelten jetzt für das Grid) */
-.fenster-zeile > .walzenfenster{margin:0;max-width:none;width:100%}
-
+.fenster-zeile > .walzenfenster {
+  margin: 0;
+  max-width: none;
+  width: 100%;
+}
 
 /* ---------- 2. Tabs ------------------------------------------------ */
-.linien-tabs{display:flex;flex-direction:column;justify-content:space-between;align-items:center;padding:var(--fv) 0}
-
-.linien-tab{
-  position:relative;width:var(--tab-b);height:var(--tab-h);margin:0;padding:1px 0 0;
-  display:grid;place-items:center;
-  font:400 .55rem/1 var(--pixel);letter-spacing:0;color:#0b0b1d;
-  background:var(--lc);border:0;border-radius:3px;cursor:pointer;
-  box-shadow:inset 0 -2px 0 #00000040,inset 0 1px 0 #ffffff55;
-  transition:box-shadow var(--schnell),scale var(--schnell);
+.linien-tabs {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--fv) 0;
 }
-.linien-tab.links{border-radius:7px 2px 2px 7px}
-.linien-tab.rechts{border-radius:2px 7px 7px 2px}
+
+.linien-tab {
+  position: relative;
+  width: var(--tab-b);
+  height: var(--tab-h);
+  margin: 0;
+  padding: 1px 0 0;
+  display: grid;
+  place-items: center;
+  font: 400 0.55rem/1 var(--pixel);
+  letter-spacing: 0;
+  color: #0b0b1d;
+  background: var(--lc);
+  border: 0;
+  border-radius: 3px;
+  cursor: pointer;
+  box-shadow:
+    inset 0 -2px 0 #00000040,
+    inset 0 1px 0 #ffffff55;
+  transition:
+    box-shadow var(--schnell),
+    scale var(--schnell);
+}
+.linien-tab.links {
+  border-radius: 7px 2px 2px 7px;
+}
+.linien-tab.rechts {
+  border-radius: 2px 7px 7px 2px;
+}
 /* Größere Trefferfläche als die sichtbare Fläche: Auf dem Handy sind die Tabs klein, der Finger nicht. */
-.linien-tab::after{content:"";position:absolute;inset:-4px -3px}
-.linien-tab:focus-visible{outline:2px solid #fff;outline-offset:2px}
-@media (hover:hover){
-  .linien-tab:hover{box-shadow:inset 0 -2px 0 #00000040,inset 0 1px 0 #ffffff55,0 0 10px var(--lc)}
+.linien-tab::after {
+  content: "";
+  position: absolute;
+  inset: -4px -3px;
+}
+.linien-tab:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+@media (hover: hover) {
+  .linien-tab:hover {
+    box-shadow:
+      inset 0 -2px 0 #00000040,
+      inset 0 1px 0 #ffffff55,
+      0 0 10px var(--lc);
+  }
 }
 
 /* Gewinn: Der Tab leuchtet in der Linienfarbe (Weißer Ring + Schein). Den Puls schaltet das Skript nur
    ohne "Bewegung reduzieren" zu (Klasse .puls), das Leuchten selbst bleibt immer statisch erhalten. */
-.linien-tab.an{
-  z-index:1;filter:brightness(1.12);
-  box-shadow:0 0 0 2px #fff,0 0 14px 3px var(--lc),inset 0 -2px 0 #00000040;
+.linien-tab.an {
+  z-index: 1;
+  filter: brightness(1.12);
+  box-shadow:
+    0 0 0 2px #fff,
+    0 0 14px 3px var(--lc),
+    inset 0 -2px 0 #00000040;
 }
-@keyframes tab-puls{from{scale:1}to{scale:1.25}}
-.linien-tab.puls{animation:tab-puls .42s ease-in-out 6 alternate}
+@keyframes tab-puls {
+  from {
+    scale: 1;
+  }
+  to {
+    scale: 1.25;
+  }
+}
+.linien-tab.puls {
+  animation: tab-puls 0.42s ease-in-out 6 alternate;
+}
 /* Nach dem Aufleuchten bleibt ein dezenter Ring stehen (wie die umrandeten Gewinnfelder) */
-.linien-tab.gewonnen:not(.an){
-  box-shadow:0 0 0 2px color-mix(in srgb,var(--lc) 70%,#fff),0 0 8px var(--lc),inset 0 -2px 0 #00000040;
+.linien-tab.gewonnen:not(.an) {
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--lc) 70%, #fff),
+    0 0 8px var(--lc),
+    inset 0 -2px 0 #00000040;
 }
-
 
 /* ---------- 3. Vorschau -------------------------------------------- */
 /* Eigene Ebene über den Walzen und über der Gewinn-Ebene des Spiels. Das Skript setzt viewBox in Pixeln
    und die Farbe als --lc. pointer-events:none: Die Ebene fängt keine Klicks ab. */
-.linien-vorschau{position:absolute;inset:0;width:100%;height:100%;z-index:4;pointer-events:none;overflow:visible}
-.vorschau-rand{fill:none;stroke:#05050cb8;stroke-width:9;stroke-linecap:round;stroke-linejoin:round}
-.vorschau-linie{
-  fill:none;stroke:var(--lc);stroke-width:5;stroke-linecap:round;stroke-linejoin:round;
-  filter:drop-shadow(0 0 5px var(--lc));
+.linien-vorschau {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 4;
+  pointer-events: none;
+  overflow: visible;
 }
-.vorschau-punkt{fill:var(--lc);stroke:#05050c;stroke-width:2}
+.vorschau-rand {
+  fill: none;
+  stroke: #05050cb8;
+  stroke-width: 9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.vorschau-linie {
+  fill: none;
+  stroke: var(--lc);
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 5px var(--lc));
+}
+.vorschau-punkt {
+  fill: var(--lc);
+  stroke: #05050c;
+  stroke-width: 2;
+}
 /* Die Linie "wächst" von links nach rechts: zeigt nebenbei die Wertungsrichtung (pathLength="1") */
-@keyframes vorschau-zeichnen{from{stroke-dasharray:1;stroke-dashoffset:1}to{stroke-dasharray:1;stroke-dashoffset:0}}
-.vorschau-linie.zeichnet{animation:vorschau-zeichnen .3s ease-out both}
-
+@keyframes vorschau-zeichnen {
+  from {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+  }
+}
+.vorschau-linie.zeichnet {
+  animation: vorschau-zeichnen 0.3s ease-out both;
+}
 
 /* ---------- 4. Schmale Screens und reduzierte Bewegung ------------- */
 /* Auf dem Handy schrumpfen die Tabs, bleiben aber sichtbar (Zahl in Pixelschrift, 7 px). */
-@media (max-width:480px){
-  .fenster-zeile{--tab-b:18px;--tab-h:18px;--tab-abstand:3px}
-  .linien-tab{font-size:.45rem;padding-top:1px}
-  .linien-tab.links{border-radius:5px 2px 2px 5px}
-  .linien-tab.rechts{border-radius:2px 5px 5px 2px}
-  .linien-tab.an{box-shadow:0 0 0 1.5px #fff,0 0 10px 2px var(--lc),inset 0 -2px 0 #00000040}
-  .vorschau-rand{stroke-width:7}
-  .vorschau-linie{stroke-width:3.5}
-  .vorschau-punkt{stroke-width:1.5}
+@media (max-width: 480px) {
+  .fenster-zeile {
+    --tab-b: 18px;
+    --tab-h: 18px;
+    --tab-abstand: 3px;
+  }
+  .linien-tab {
+    font-size: 0.45rem;
+    padding-top: 1px;
+  }
+  .linien-tab.links {
+    border-radius: 5px 2px 2px 5px;
+  }
+  .linien-tab.rechts {
+    border-radius: 2px 5px 5px 2px;
+  }
+  .linien-tab.an {
+    box-shadow:
+      0 0 0 1.5px #fff,
+      0 0 10px 2px var(--lc),
+      inset 0 -2px 0 #00000040;
+  }
+  .vorschau-rand {
+    stroke-width: 7;
+  }
+  .vorschau-linie {
+    stroke-width: 3.5;
+  }
+  .vorschau-punkt {
+    stroke-width: 1.5;
+  }
 }
 
 /* Bewegung reduzieren: kein Puls, keine wachsende Linie (die statische Hervorhebung bleibt) */
-@media (prefers-reduced-motion:reduce){
-  .linien-tab.puls{animation:none}
-  .linien-tab{transition:none}
-  .vorschau-linie.zeichnet{animation:none}
+@media (prefers-reduced-motion: reduce) {
+  .linien-tab.puls {
+    animation: none;
+  }
+  .linien-tab {
+    transition: none;
+  }
+  .vorschau-linie.zeichnet {
+    animation: none;
+  }
 }

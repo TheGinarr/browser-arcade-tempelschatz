@@ -135,17 +135,30 @@
 import { bewegungReduziert, toplisteAnzeigen, stillEintragen } from "./assets/ui.js";
 import { gewinnFeiern, stufeBestimmen, STUFEN } from "./assets/gewinnfeier.js";
 import {
-  tonKnopf, klangSpinStart, klangWalzenStopp, klangSpannung, klangFastGewinn, klangGewinn, klangMuenzTick,
+  tonKnopf,
+  klangSpinStart,
+  klangWalzenStopp,
+  klangSpannung,
+  klangFastGewinn,
+  klangGewinn,
+  klangMuenzTick,
 } from "./assets/klang.js";
 import { linienAnzeigeBauen, linienFarbe } from "./assets/gewinnlinien.js";
 import { lade, speichere, entferne } from "./assets/storage.js";
 import {
-  STARTGELD, kontostand, statistik, einsatzAbbuchen, rundeAbschliessen,
-  istPleite, pleiteNeustart, walletHud, walletHudAktualisieren,
+  STARTGELD,
+  kontostand,
+  statistik,
+  einsatzAbbuchen,
+  rundeAbschliessen,
+  istPleite,
+  pleiteNeustart,
+  walletHud,
+  walletHudAktualisieren,
 } from "./assets/wallet.js";
 
-const SPIEL = "tempelschatz";                   // Schlüssel für storage.js (Topliste, Einsatz, Freispiel-Stand)
-const MINDEST_NETTO_FUER_TOPLISTE = 100;        // kleinere Runden-Gewinne füllen die Topliste nicht
+const SPIEL = "tempelschatz"; // Schlüssel für storage.js (Topliste, Einsatz, Freispiel-Stand)
+const MINDEST_NETTO_FUER_TOPLISTE = 100; // kleinere Runden-Gewinne füllen die Topliste nicht
 
 /* ============================================================
    TEIL 1: REINE SPIELLOGIK (ohne DOM)
@@ -161,8 +174,15 @@ export const ANZAHL_REIHEN = 3;
 export const ANZAHL_LINIEN = 10;
 
 /* Kurznamen, damit Bänder und Tabellen unten lesbar bleiben. */
-const ZEH = "zehn", BUB = "bube", DAM = "dame", KOE = "koenig", ASS = "ass";
-const SKA = "skarabaeus", FAL = "falke", PHA = "pharao", TOR = "tor";
+const ZEH = "zehn",
+  BUB = "bube",
+  DAM = "dame",
+  KOE = "koenig",
+  ASS = "ass";
+const SKA = "skarabaeus",
+  FAL = "falke",
+  PHA = "pharao",
+  TOR = "tor";
 
 /** Alle Linien-Symbole von niedrig nach hoch (der Scatter "tor" gehört NICHT dazu). */
 export const SYMBOLE = [ZEH, BUB, DAM, KOE, ASS, SKA, FAL, PHA];
@@ -170,8 +190,15 @@ export const SCATTER = TOR;
 
 /** Anzeigenamen (für Screenreader, Tabellen und Meldungen). */
 export const SYMBOL_NAMEN = {
-  zehn: "Zehn", bube: "Bube", dame: "Dame", koenig: "König", ass: "Ass",
-  skarabaeus: "Skarabäus", falke: "Horusfalke", pharao: "Pharao-Maske", tor: "Tempeltor",
+  zehn: "Zehn",
+  bube: "Bube",
+  dame: "Dame",
+  koenig: "König",
+  ass: "Ass",
+  skarabaeus: "Skarabäus",
+  falke: "Horusfalke",
+  pharao: "Pharao-Maske",
+  tor: "Tempeltor",
 };
 
 /**
@@ -181,19 +208,28 @@ export const SYMBOL_NAMEN = {
  * unten, Walze 4 Mitte, Walze 5 oben – ein "V".
  */
 export const GEWINNLINIEN = [
-  [1, 1, 1, 1, 1],   //  1  Mitte (Gerade)
-  [0, 0, 0, 0, 0],   //  2  oben (Gerade)
-  [2, 2, 2, 2, 2],   //  3  unten (Gerade)
-  [0, 1, 2, 1, 0],   //  4  V
-  [1, 2, 2, 2, 1],   //  5  flaches V (Schale)
-  [2, 1, 0, 1, 2],   //  6  umgekehrtes V (Dach)
-  [1, 0, 0, 0, 1],   //  7  flaches umgekehrtes V
-  [0, 1, 0, 1, 0],   //  8  Zickzack oben
-  [2, 1, 2, 1, 2],   //  9  Zickzack unten
-  [1, 0, 1, 2, 1],   // 10  Zickzack-Welle
+  [1, 1, 1, 1, 1], //  1  Mitte (Gerade)
+  [0, 0, 0, 0, 0], //  2  oben (Gerade)
+  [2, 2, 2, 2, 2], //  3  unten (Gerade)
+  [0, 1, 2, 1, 0], //  4  V
+  [1, 2, 2, 2, 1], //  5  flaches V (Schale)
+  [2, 1, 0, 1, 2], //  6  umgekehrtes V (Dach)
+  [1, 0, 0, 0, 1], //  7  flaches umgekehrtes V
+  [0, 1, 0, 1, 0], //  8  Zickzack oben
+  [2, 1, 2, 1, 2], //  9  Zickzack unten
+  [1, 0, 1, 2, 1], // 10  Zickzack-Welle
 ];
 export const LINIEN_NAMEN = [
-  "Mitte", "Oben", "Unten", "V", "Schale", "Dach", "Flaches Dach", "Zickzack oben", "Zickzack unten", "Welle",
+  "Mitte",
+  "Oben",
+  "Unten",
+  "V",
+  "Schale",
+  "Dach",
+  "Flaches Dach",
+  "Zickzack oben",
+  "Zickzack unten",
+  "Welle",
 ];
 
 /**
@@ -216,29 +252,164 @@ export const LINIEN_NAMEN = [
  */
 export const WALZENBAENDER = [
   [
-    ASS, BUB, ZEH, KOE, ASS, ZEH, SKA, DAM, BUB, ZEH,
-    SKA, BUB, DAM, ZEH, BUB, KOE, ZEH, BUB, DAM, ZEH,
-    PHA, FAL, BUB, ZEH, TOR, DAM, KOE, FAL, BUB, KOE,
+    ASS,
+    BUB,
+    ZEH,
+    KOE,
+    ASS,
+    ZEH,
+    SKA,
+    DAM,
+    BUB,
+    ZEH,
+    SKA,
+    BUB,
+    DAM,
+    ZEH,
+    BUB,
+    KOE,
+    ZEH,
+    BUB,
+    DAM,
+    ZEH,
+    PHA,
+    FAL,
+    BUB,
+    ZEH,
+    TOR,
+    DAM,
+    KOE,
+    FAL,
+    BUB,
+    KOE,
   ],
   [
-    KOE, DAM, ZEH, ASS, BUB, SKA, DAM, ZEH, KOE, BUB,
-    PHA, ZEH, TOR, BUB, DAM, ZEH, BUB, KOE, FAL, ZEH,
-    ASS, BUB, FAL, DAM, BUB, SKA, ZEH, KOE, BUB, ZEH,
+    KOE,
+    DAM,
+    ZEH,
+    ASS,
+    BUB,
+    SKA,
+    DAM,
+    ZEH,
+    KOE,
+    BUB,
+    PHA,
+    ZEH,
+    TOR,
+    BUB,
+    DAM,
+    ZEH,
+    BUB,
+    KOE,
+    FAL,
+    ZEH,
+    ASS,
+    BUB,
+    FAL,
+    DAM,
+    BUB,
+    SKA,
+    ZEH,
+    KOE,
+    BUB,
+    ZEH,
   ],
   [
-    DAM, ZEH, ASS, BUB, SKA, ZEH, BUB, ASS, FAL, ZEH,
-    BUB, PHA, ZEH, KOE, DAM, ZEH, BUB, DAM, KOE, BUB,
-    ZEH, KOE, FAL, BUB, SKA, DAM, BUB, ZEH, TOR, KOE,
+    DAM,
+    ZEH,
+    ASS,
+    BUB,
+    SKA,
+    ZEH,
+    BUB,
+    ASS,
+    FAL,
+    ZEH,
+    BUB,
+    PHA,
+    ZEH,
+    KOE,
+    DAM,
+    ZEH,
+    BUB,
+    DAM,
+    KOE,
+    BUB,
+    ZEH,
+    KOE,
+    FAL,
+    BUB,
+    SKA,
+    DAM,
+    BUB,
+    ZEH,
+    TOR,
+    KOE,
   ],
   [
-    KOE, BUB, ZEH, KOE, PHA, ASS, BUB, KOE, DAM, ZEH,
-    BUB, TOR, DAM, ZEH, ASS, BUB, DAM, ZEH, BUB, FAL,
-    KOE, SKA, ZEH, BUB, SKA, ZEH, FAL, BUB, ZEH, DAM,
+    KOE,
+    BUB,
+    ZEH,
+    KOE,
+    PHA,
+    ASS,
+    BUB,
+    KOE,
+    DAM,
+    ZEH,
+    BUB,
+    TOR,
+    DAM,
+    ZEH,
+    ASS,
+    BUB,
+    DAM,
+    ZEH,
+    BUB,
+    FAL,
+    KOE,
+    SKA,
+    ZEH,
+    BUB,
+    SKA,
+    ZEH,
+    FAL,
+    BUB,
+    ZEH,
+    DAM,
   ],
   [
-    ASS, BUB, ZEH, KOE, TOR, BUB, DAM, KOE, ZEH, BUB,
-    KOE, ZEH, SKA, BUB, ZEH, DAM, BUB, FAL, ZEH, SKA,
-    ASS, BUB, DAM, ZEH, FAL, DAM, KOE, PHA, BUB, ZEH,
+    ASS,
+    BUB,
+    ZEH,
+    KOE,
+    TOR,
+    BUB,
+    DAM,
+    KOE,
+    ZEH,
+    BUB,
+    KOE,
+    ZEH,
+    SKA,
+    BUB,
+    ZEH,
+    DAM,
+    BUB,
+    FAL,
+    ZEH,
+    SKA,
+    ASS,
+    BUB,
+    DAM,
+    ZEH,
+    FAL,
+    DAM,
+    KOE,
+    PHA,
+    BUB,
+    ZEH,
   ],
 ];
 
@@ -255,7 +426,7 @@ export const LINIENQUOTEN = {
   [ASS]: { 3: 16, 4: 80, 5: 400 },
   [SKA]: { 3: 30, 4: 150, 5: 750 },
   [FAL]: { 3: 40, 4: 200, 5: 1000 },
-  [PHA]: { 2: 10, 3: 100, 4: 500, 5: 2500 },   // die Pharao-Maske zahlt schon ab 2
+  [PHA]: { 2: 10, 3: 100, 4: 500, 5: 2500 }, // die Pharao-Maske zahlt schon ab 2
 };
 
 /**
@@ -279,10 +450,10 @@ export const EXPANSIONSQUOTEN = {
   [PHA]: { 2: 30, 3: 350, 4: 1500, 5: 6000 },
 };
 
-export const SCATTER_MINDESTANZAHL = 3;          // so viele Tempeltore braucht der Scatter-Gewinn + Freispiele
-export const SCATTER_QUOTE = 2;                  // Vielfaches des Gesamteinsatzes
+export const SCATTER_MINDESTANZAHL = 3; // so viele Tempeltore braucht der Scatter-Gewinn + Freispiele
+export const SCATTER_QUOTE = 2; // Vielfaches des Gesamteinsatzes
 export const FREISPIELE_PRO_AUSLOESUNG = 10;
-export const EXPANSION_MINDESTVORKOMMEN = 2;     // so oft muss das Spezialsymbol im Sichtfeld liegen
+export const EXPANSION_MINDESTVORKOMMEN = 2; // so oft muss das Spezialsymbol im Sichtfeld liegen
 
 /** Ab wie vielen gleichen Symbolen von links zahlt eine Linie? Pharao ab 2, alle anderen ab 3. */
 export function mindestAnzahl(symbol) {
@@ -359,9 +530,11 @@ export function liniengewinneAuswerten(feld, einsatz) {
 /** Scatter: zählt alle Tempeltore im Sichtfeld, egal wo sie liegen. */
 export function scatterAuswerten(feld, einsatz) {
   const positionen = [];
-  feld.forEach((spalte, walze) => spalte.forEach((symbol, reihe) => {
-    if (symbol === SCATTER) positionen.push([walze, reihe]);
-  }));
+  feld.forEach((spalte, walze) =>
+    spalte.forEach((symbol, reihe) => {
+      if (symbol === SCATTER) positionen.push([walze, reihe]);
+    }),
+  );
   const ausgeloest = positionen.length >= SCATTER_MINDESTANZAHL;
   return {
     anzahl: positionen.length,
@@ -395,7 +568,15 @@ export function expansionAuswerten(feld, symbol, einsatz) {
     return { symbol, ausgeloest: false, vorkommen, walzen: [], anzahl: 0, quote: 0, betrag: 0 };
   }
   const quote = EXPANSIONSQUOTEN[symbol][walzen.length] ?? 0;
-  return { symbol, ausgeloest: true, vorkommen, walzen, anzahl: walzen.length, quote, betrag: quote * einsatz };
+  return {
+    symbol,
+    ausgeloest: true,
+    vorkommen,
+    walzen,
+    anzahl: walzen.length,
+    quote,
+    betrag: quote * einsatz,
+  };
 }
 
 /**
@@ -431,14 +612,18 @@ export function spielzugAuswerten(feld, einsatz, spezialSymbol = null) {
  */
 export const HOHE_SYMBOLE = [ASS, SKA, FAL, PHA];
 export function fastGewinnErmitteln(feld, liniengewinne, scatter) {
-  if (scatter.anzahl === 2) return { art: "scatter", symbol: SCATTER, positionen: scatter.positionen };
+  if (scatter.anzahl === 2)
+    return { art: "scatter", symbol: SCATTER, positionen: scatter.positionen };
   const kandidaten = liniengewinne
     .filter((g) => g.anzahl === 4 && HOHE_SYMBOLE.includes(g.symbol))
     .sort((a, b) => b.quote - a.quote);
   for (const g of kandidaten) {
     const positionen = [];
     for (let reihe = 0; reihe < ANZAHL_REIHEN; reihe++) {
-      if (reihe !== GEWINNLINIEN[g.linie][ANZAHL_WALZEN - 1] && feld[ANZAHL_WALZEN - 1][reihe] === g.symbol) {
+      if (
+        reihe !== GEWINNLINIEN[g.linie][ANZAHL_WALZEN - 1] &&
+        feld[ANZAHL_WALZEN - 1][reihe] === g.symbol
+      ) {
         positionen.push([ANZAHL_WALZEN - 1, reihe]);
       }
     }
@@ -504,7 +689,7 @@ export function rundeSimulieren(einsatz = 10, zufall = Math.random, baender = WA
   const grund = spielzugDurchfuehren(runde, zufall, baender);
   const grundAuszahlung = grund.ergebnis.summe;
   const ausgeloest = grund.neueFreispiele > 0;
-  let nachladen = 0;                         // Wiederauslösungen in den Freispielen
+  let nachladen = 0; // Wiederauslösungen in den Freispielen
   while (runde.uebrig > 0) {
     const zug = spielzugDurchfuehren(runde, zufall, baender);
     if (zug.neueFreispiele > 0) nachladen++;
@@ -532,7 +717,8 @@ export function freispielStandPruefen(roh) {
   if (!SYMBOLE.includes(symbol)) return null;
   if (!Number.isInteger(uebrig) || uebrig < 1 || uebrig > 500) return null;
   if (!Number.isInteger(bisher) || bisher < 0 || bisher > 1e9) return null;
-  const gespieltSauber = Number.isInteger(gespielt) && gespielt >= 0 && gespielt <= 1e6 ? gespielt : 0;
+  const gespieltSauber =
+    Number.isInteger(gespielt) && gespielt >= 0 && gespielt <= 1e6 ? gespielt : 0;
   return { einsatz, bisher, uebrig, symbol, gespielt: gespieltSauber };
 }
 
@@ -555,7 +741,12 @@ export function rtpExaktBerechnen(baender = WALZENBAENDER) {
   const einsatz = 10;
   const stopps = [0, 0, 0, 0, 0];
   const laengen = baender.map((b) => b.length);
-  let kombinationen = 0, linienSumme = 0, scatterSumme = 0, scatterAnzahl = 0, treffer = 0, trefferUnterEinsatz = 0;
+  let kombinationen = 0,
+    linienSumme = 0,
+    scatterSumme = 0,
+    scatterAnzahl = 0,
+    treffer = 0,
+    trefferUnterEinsatz = 0;
   const expansionSumme = Object.fromEntries(SYMBOLE.map((s) => [s, 0]));
 
   for (stopps[0] = 0; stopps[0] < laengen[0]; stopps[0]++)
@@ -575,7 +766,8 @@ export function rtpExaktBerechnen(baender = WALZENBAENDER) {
               treffer++;
               if (linien + sc.betrag < einsatz) trefferUnterEinsatz++;
             }
-            for (const s of SYMBOLE) expansionSumme[s] += expansionAuswerten(feld, s, einsatz).betrag;
+            for (const s of SYMBOLE)
+              expansionSumme[s] += expansionAuswerten(feld, s, einsatz).betrag;
           }
 
   const linienAnteil = linienSumme / kombinationen / einsatz;
@@ -587,9 +779,18 @@ export function rtpExaktBerechnen(baender = WALZENBAENDER) {
   const freispieleProAusloesung = FREISPIELE_PRO_AUSLOESUNG / (1 - FREISPIELE_PRO_AUSLOESUNG * p);
   const rFreispiele = p * freispieleProAusloesung * (rBasis + expansionMittel);
   return {
-    kombinationen, linienAnteil, scatterAnteil, ausloesewahrscheinlichkeit: p, expansionMittel, expansionJeSymbol,
-    freispieleProAusloesung, rBasis, rFreispiele, rtp: rBasis + rFreispiele,
-    trefferquote: treffer / kombinationen, anteilUnterEinsatz: trefferUnterEinsatz / treffer,
+    kombinationen,
+    linienAnteil,
+    scatterAnteil,
+    ausloesewahrscheinlichkeit: p,
+    expansionMittel,
+    expansionJeSymbol,
+    freispieleProAusloesung,
+    rBasis,
+    rFreispiele,
+    rtp: rBasis + rFreispiele,
+    trefferquote: treffer / kombinationen,
+    anteilUnterEinsatz: trefferUnterEinsatz / treffer,
   };
 }
 
@@ -605,15 +806,15 @@ export function rtpExaktBerechnen(baender = WALZENBAENDER) {
    gleichmäßig nacheinander. Positionen werden in FELDERN gerechnet
    (1,0 = ein Symbol weiter). */
 
-const BREMS_WEG = 2.5;      // so viele Felder legt die Walze in der Bremsphase zurück
-const BREMS_ZEIT = 0.5;     // Sekunden für die Bremsphase
-const BOUNCE = 1.3;         // Stärke des Überschwingens (0 = gar nicht, 1,7 = deutlich)
+const BREMS_WEG = 2.5; // so viele Felder legt die Walze in der Bremsphase zurück
+const BREMS_ZEIT = 0.5; // Sekunden für die Bremsphase
+const BOUNCE = 1.3; // Stärke des Überschwingens (0 = gar nicht, 1,7 = deutlich)
 /* Ableitung (= Anfangsgeschwindigkeit) von easeOutBack bei x=0 ist BOUNCE+3.
    Rollt die Walze genau so schnell, geht sie ohne Ruck in die Bremsphase über. */
-const LAUF_TEMPO = BREMS_WEG * (BOUNCE + 3) / BREMS_ZEIT;   // Felder pro Sekunde (hier 21,5)
-const ERSTE_WALZE_LAUFZEIT = 0.45;     // Sekunden Rollen, bevor die erste Walze bremst
-const WALZEN_ABSTAND = 0.22;           // jede weitere Walze rollt so viel länger
-const EXTRA_OBEN = 2;                  // Zusatzfelder über dem Ziel (sichtbar beim Überschwingen)
+const LAUF_TEMPO = (BREMS_WEG * (BOUNCE + 3)) / BREMS_ZEIT; // Felder pro Sekunde (hier 21,5)
+const ERSTE_WALZE_LAUFZEIT = 0.45; // Sekunden Rollen, bevor die erste Walze bremst
+const WALZEN_ABSTAND = 0.22; // jede weitere Walze rollt so viel länger
+const EXTRA_OBEN = 2; // Zusatzfelder über dem Ziel (sichtbar beim Überschwingen)
 
 /* ---- Spannung ("Anticipation") ----
    Das Herzstück echter 5-Walzen-Automaten: Liegen nach den ersten Walzen schon
@@ -622,10 +823,10 @@ const EXTRA_OBEN = 2;                  // Zusatzfelder über dem Ziel (sichtbar 
    normal (1., 2., 3. betroffene Walze: steigend), und ihre Bremsphase dauert doppelt so lang.
    Das Tempo der Rollphase bleibt gleich: Mit BREMS_ZEIT_SPANNUNG = 1,0 und gleichem Anfangstempo
    ergibt sich der Bremsweg wieder aus der Ableitung von easeOutBack (hier 5,0 Felder). */
-export const SPANNUNG_AB = 2;                                  // so viele Scatter müssen schon liegen
-const SPANNUNG_EXTRA = [0.8, 1.15, 1.5];                       // Zusatz-Sekunden je betroffener Walze (steigend)
-const BREMS_ZEIT_SPANNUNG = 1.0;                               // langsames Ausdrehen
-const BREMS_WEG_SPANNUNG = LAUF_TEMPO * BREMS_ZEIT_SPANNUNG / (BOUNCE + 3);
+export const SPANNUNG_AB = 2; // so viele Scatter müssen schon liegen
+const SPANNUNG_EXTRA = [0.8, 1.15, 1.5]; // Zusatz-Sekunden je betroffener Walze (steigend)
+const BREMS_ZEIT_SPANNUNG = 1.0; // langsames Ausdrehen
+const BREMS_WEG_SPANNUNG = (LAUF_TEMPO * BREMS_ZEIT_SPANNUNG) / (BOUNCE + 3);
 
 /**
  * Bestimmt, ob und ab welcher Walze die Spannung läuft. `feld` ist das fertige Ergebnis (feld[walze][reihe]).
@@ -644,7 +845,9 @@ const BREMS_WEG_SPANNUNG = LAUF_TEMPO * BREMS_ZEIT_SPANNUNG / (BOUNCE + 3);
 export function spannungErmitteln(feld) {
   const scatter = [];
   for (let walze = 0; walze < ANZAHL_WALZEN - 1; walze++) {
-    feld[walze].forEach((symbol, reihe) => { if (symbol === SCATTER) scatter.push([walze, reihe]); });
+    feld[walze].forEach((symbol, reihe) => {
+      if (symbol === SCATTER) scatter.push([walze, reihe]);
+    });
     if (scatter.length >= SPANNUNG_AB) return { ab: walze + 1, scatter };
   }
   return { ab: -1, scatter: [] };
@@ -678,13 +881,20 @@ export function laufPlanErstellen(anzahlWalzen = ANZAHL_WALZEN, spannungAb = -1)
     const bremsZeit = spannung ? BREMS_ZEIT_SPANNUNG : BREMS_ZEIT;
     const bremsWeg = spannung ? BREMS_WEG_SPANNUNG : BREMS_WEG;
     const wunschEnde = spannung
-      ? vorherEnde + WALZEN_ABSTAND + SPANNUNG_EXTRA[Math.min(i - spannungAb, SPANNUNG_EXTRA.length - 1)]
+      ? vorherEnde +
+        WALZEN_ABSTAND +
+        SPANNUNG_EXTRA[Math.min(i - spannungAb, SPANNUNG_EXTRA.length - 1)]
       : ERSTE_WALZE_LAUFZEIT + i * WALZEN_ABSTAND + BREMS_ZEIT;
     const distanz = Math.round(LAUF_TEMPO * (wunschEnde - bremsZeit) + bremsWeg);
     const laufzeit = (distanz - bremsWeg) / LAUF_TEMPO;
     plaene.push({
-      distanz, laufzeit, bremsZeit, bremsWeg, ende: laufzeit + bremsZeit,
-      spannung, spannungStart: spannung ? vorherEnde : null,
+      distanz,
+      laufzeit,
+      bremsZeit,
+      bremsWeg,
+      ende: laufzeit + bremsZeit,
+      spannung,
+      spannungStart: spannung ? vorherEnde : null,
     });
     vorherEnde = laufzeit + bremsZeit;
   }
@@ -693,9 +903,9 @@ export function laufPlanErstellen(anzahlWalzen = ANZAHL_WALZEN, spannungAb = -1)
 
 /** Zurückgelegte Strecke (in Feldern) einer Walze zum Zeitpunkt t (Sekunden seit Start). */
 export function vorschubZurZeit(plan, t) {
-  if (t <= plan.laufzeit) return LAUF_TEMPO * Math.max(t, 0);                  // Phase 1: gleichmäßig rollen
-  const x = Math.min((t - plan.laufzeit) / plan.bremsZeit, 1);                 // Phase 2: Fortschritt 0 … 1
-  return (plan.distanz - plan.bremsWeg) + plan.bremsWeg * easeOutBack(x);
+  if (t <= plan.laufzeit) return LAUF_TEMPO * Math.max(t, 0); // Phase 1: gleichmäßig rollen
+  const x = Math.min((t - plan.laufzeit) / plan.bremsZeit, 1); // Phase 2: Fortschritt 0 … 1
+  return plan.distanz - plan.bremsWeg + plan.bremsWeg * easeOutBack(x);
 }
 
 /**
@@ -711,7 +921,7 @@ export function laufbandSymbole(band, startStopp, zielStopp, distanz, zufall = M
   const streifen = [];
   for (let j = EXTRA_OBEN; j >= 1; j--) streifen.push(an(zielStopp - 1 - j));
   streifen.push(an(zielStopp - 1), an(zielStopp), an(zielStopp + 1));
-  const fuellfelder = distanz - 3;                       // gesamt = EXTRA_OBEN + 3 + Füllfelder + 3 = distanz + 3 + EXTRA_OBEN
+  const fuellfelder = distanz - 3; // gesamt = EXTRA_OBEN + 3 + Füllfelder + 3 = distanz + 3 + EXTRA_OBEN
   for (let i = 0; i < fuellfelder; i++) streifen.push(band[Math.floor(zufall() * n)]);
   streifen.push(an(startStopp - 1), an(startStopp), an(startStopp + 1));
   return streifen;
@@ -763,7 +973,12 @@ function warte(ms) {
  * fortgesetztes Spiel (z. B. nach dem Neuladen) eine Konsolen-Warnung erzeugen.
  */
 function klang(funktion, ...argumente) {
-  if (typeof navigator !== "undefined" && navigator.userActivation && !navigator.userActivation.hasBeenActive) return;
+  if (
+    typeof navigator !== "undefined" &&
+    navigator.userActivation &&
+    !navigator.userActivation.hasBeenActive
+  )
+    return;
   funktion(...argumente);
 }
 
@@ -802,11 +1017,14 @@ function animationNeuStarten(element, klasse) {
 function liniengrafikenBauen(container) {
   GEWINNLINIEN.forEach((reihen, nr) => {
     const figur = document.createElement("figure");
-    figur.style.setProperty("--lc", linienFarbe(nr));       // dieselbe Farbe wie der Tab dieser Linie
+    figur.style.setProperty("--lc", linienFarbe(nr)); // dieselbe Farbe wie der Tab dieser Linie
     const svg = document.createElementNS(SVG_NS, "svg");
     svg.setAttribute("viewBox", "0 0 60 36");
     svg.setAttribute("role", "img");
-    svg.setAttribute("aria-label", `Linie ${nr + 1}: ${LINIEN_NAMEN[nr]}, Reihen ${reihen.join(", ")}`);
+    svg.setAttribute(
+      "aria-label",
+      `Linie ${nr + 1}: ${LINIEN_NAMEN[nr]}, Reihen ${reihen.join(", ")}`,
+    );
     // Raster: 5 Spalten x 3 Reihen kleine Felder
     for (let w = 0; w < ANZAHL_WALZEN; w++) {
       for (let r = 0; r < ANZAHL_REIHEN; r++) {
@@ -821,7 +1039,9 @@ function liniengrafikenBauen(container) {
       }
     }
     // Die Linie selbst: durch die Mitte der markierten Felder
-    const punkte = reihen.map((reihe, w) => `${2 + w * 11.2 + 4.8},${2 + reihe * 11.2 + 4.8}`).join(" ");
+    const punkte = reihen
+      .map((reihe, w) => `${2 + w * 11.2 + 4.8},${2 + reihe * 11.2 + 4.8}`)
+      .join(" ");
     const linie = document.createElementNS(SVG_NS, "polyline");
     linie.setAttribute("points", punkte);
     linie.setAttribute("class", "linie");
@@ -876,8 +1096,8 @@ function starteSpiel() {
   const laengen = WALZENBAENDER.map((band) => band.length);
 
   // ----- Spielzustand -----
-  let laeuft = false;                 // true, solange gedreht wird (auch durch alle Freispiele): alles gesperrt
-  let stopps = zufallsStopps();       // aktuelle Stopp-Indizes (Startbild: zufällig, hat keinen Einfluss aufs Geld)
+  let laeuft = false; // true, solange gedreht wird (auch durch alle Freispiele): alles gesperrt
+  let stopps = zufallsStopps(); // aktuelle Stopp-Indizes (Startbild: zufällig, hat keinen Einfluss aufs Geld)
   /* runde = die aktuelle Runde (siehe neueRunde) oder null. Zusätzlich merkt sie sich
      "abgerechnet", damit das Geld nie doppelt gutgeschrieben wird. Ist runde gesetzt
      und laeuft === false, warten gesicherte Freispiele darauf, fortgesetzt zu werden. */
@@ -890,7 +1110,9 @@ function starteSpiel() {
      der Seriengewinn nur gefeiert, wenn er eine HÖHERE Stufe erreicht. Sonst würde dieselbe Stufe doppelt kommen. */
   let hoechsteStufe = 0;
   const gespeicherterEinsatz = lade(SPIEL, "einsatz", EINSATZSTUFEN[0]);
-  let gewaehlterEinsatz = EINSATZSTUFEN.includes(gespeicherterEinsatz) ? gespeicherterEinsatz : EINSATZSTUFEN[0];
+  let gewaehlterEinsatz = EINSATZSTUFEN.includes(gespeicherterEinsatz)
+    ? gespeicherterEinsatz
+    : EINSATZSTUFEN[0];
 
   // ---------------------------------------------------------
   // Walzen aufbauen und positionieren
@@ -921,7 +1143,8 @@ function starteSpiel() {
   function positionSetzen(walzenNr, position) {
     const n = laengen[walzenNr];
     const prozent = ((position + n - 1) / (3 * n)) * 100;
-    walzenElemente[walzenNr].querySelector(".band").style.transform = `translate3d(0, ${-prozent}%, 0)`;
+    walzenElemente[walzenNr].querySelector(".band").style.transform =
+      `translate3d(0, ${-prozent}%, 0)`;
   }
 
   function alleWalzenSetzen() {
@@ -932,7 +1155,9 @@ function starteSpiel() {
   /** Screenreader-Beschriftung des Fensters: nennt alle 15 sichtbaren Symbole Walze für Walze. */
   function fensterBeschriften() {
     const feld = sichtfeldAusStopps(stopps);
-    const text = feld.map((spalte, i) => `Walze ${i + 1}: ${spalte.map((id) => SYMBOL_NAMEN[id]).join(", ")}`).join("; ");
+    const text = feld
+      .map((spalte, i) => `Walze ${i + 1}: ${spalte.map((id) => SYMBOL_NAMEN[id]).join(", ")}`)
+      .join("; ");
     fensterElement.setAttribute("aria-label", text);
   }
 
@@ -966,7 +1191,7 @@ function starteSpiel() {
     chipKnoepfe.forEach((chip) => {
       const wert = Number(chip.dataset.einsatz);
       chip.setAttribute("aria-pressed", String(wert === wirksam));
-      chip.disabled = laeuft || runde !== null || wert > stand;     // gesperrt beim Drehen, in Freispielen oder wenn zu teuer
+      chip.disabled = laeuft || runde !== null || wert > stand; // gesperrt beim Drehen, in Freispielen oder wenn zu teuer
     });
     drehKnopf.textContent = wartetAufFortsetzung ? "FREISPIELE FORTSETZEN" : "DREHEN";
     drehKnopf.disabled = laeuft || (runde === null && wirksam === 0);
@@ -987,8 +1212,8 @@ function starteSpiel() {
   // ---------------------------------------------------------
   // Gewinntabellen (aus den Konstanten gebaut: eine Quelle der Wahrheit)
   // ---------------------------------------------------------
-  const linienZellen = {};        // symbol -> { zeile, 2: <td>, 3: <td>, … }
-  const betragsZellen = [];       // { zelle, quote, art } zum späteren Aktualisieren
+  const linienZellen = {}; // symbol -> { zeile, 2: <td>, 3: <td>, … }
+  const betragsZellen = []; // { zelle, quote, art } zum späteren Aktualisieren
 
   function symbolZelleBauen(symbolId) {
     const th = document.createElement("th");
@@ -1036,7 +1261,8 @@ function starteSpiel() {
 
       const ez = document.createElement("tr");
       ez.append(symbolZelleBauen(symbolId));
-      for (const anzahl of [2, 3, 4, 5]) ez.append(betragsZelleBauen(EXPANSIONSQUOTEN[symbolId][anzahl], "expansion"));
+      for (const anzahl of [2, 3, 4, 5])
+        ez.append(betragsZelleBauen(EXPANSIONSQUOTEN[symbolId][anzahl], "expansion"));
       expansionsTabelle.append(ez);
     }
   }
@@ -1048,7 +1274,9 @@ function starteSpiel() {
       `Beträge für deinen Einsatz von ${zahlText(einsatz)}. Linien-Gewinn = Quote × Einsatz ÷ 10 ` +
       `(Netto-Gewinn = Auszahlung minus Einsatz).`;
     for (const { betrag, quote, art } of betragsZellen) {
-      betrag.textContent = zahlText(art === "linie" ? liniengewinnBetrag(quote, einsatz) : quote * einsatz);
+      betrag.textContent = zahlText(
+        art === "linie" ? liniengewinnBetrag(quote, einsatz) : quote * einsatz,
+      );
     }
     scatterBetrag.textContent = zahlText(einsatz * SCATTER_QUOTE);
   }
@@ -1067,7 +1295,7 @@ function starteSpiel() {
 
   /** Setzt Text und Farbe (plus/minus) von Gewinn-Anzeige und HUD-Feld. */
   function ergebnisAnzeigen(netto) {
-    const text = netto > 0 ? `+${zahlText(netto)}` : `−${zahlText(Math.abs(netto))}`;   // echtes Minuszeichen
+    const text = netto > 0 ? `+${zahlText(netto)}` : `−${zahlText(Math.abs(netto))}`; // echtes Minuszeichen
     const art = netto > 0 ? "plus" : "minus";
     gewinnAnzeige.textContent = text;
     gewinnAnzeige.className = `gewinn-anzeige ${art}`;
@@ -1113,9 +1341,19 @@ function starteSpiel() {
 
   /** Entfernt alle Gewinn-Effekte des letzten Zugs. */
   function effekteLoeschen() {
-    fensterElement.querySelectorAll(".gewinn-blinken, .gewinn-dauer, .scatter-treffer, .scatter-spannung, .knapp").forEach((z) => {
-      z.classList.remove("gewinn-blinken", "gewinn-dauer", "scatter-treffer", "scatter-spannung", "knapp");
-    });
+    fensterElement
+      .querySelectorAll(
+        ".gewinn-blinken, .gewinn-dauer, .scatter-treffer, .scatter-spannung, .knapp",
+      )
+      .forEach((z) => {
+        z.classList.remove(
+          "gewinn-blinken",
+          "gewinn-dauer",
+          "scatter-treffer",
+          "scatter-spannung",
+          "knapp",
+        );
+      });
     // Lauflicht-Rahmen zurück in den Leerlauf (siehe spiel.css: .dreht = schnell, .gewinn = golden)
     fensterElement.classList.remove("dreht", "gewinn", "spannung");
     buehneElement.classList.remove("spannung");
@@ -1160,7 +1398,7 @@ function starteSpiel() {
   function walzenLaufenLassen(ziel) {
     const zielFeld = sichtfeldAusStopps(ziel);
     const spannung = spannungErmitteln(zielFeld);
-    klang(klangSpinStart);      // läuft noch synchron im Klick: erlaubt dem Browser den Ton zu starten
+    klang(klangSpinStart); // läuft noch synchron im Klick: erlaubt dem Browser den Ton zu starten
 
     // Reduzierte Bewegung: kein Lauf, Ergebnis fast sofort. Die Spannung schrumpft auf höchstens 0,3 s Wartezeit.
     if (bewegungReduziert()) {
@@ -1187,7 +1425,9 @@ function starteSpiel() {
        Band; die Klasse "laeuft" tauscht beide aus (siehe spiel.css). */
     walzenElemente.forEach((walze, i) => {
       const laufband = walze.querySelector(".laufband");
-      laufband.replaceChildren(...laufbandSymbole(WALZENBAENDER[i], stopps[i], ziel[i], plaene[i].distanz).map(zelleBauen));
+      laufband.replaceChildren(
+        ...laufbandSymbole(WALZENBAENDER[i], stopps[i], ziel[i], plaene[i].distanz).map(zelleBauen),
+      );
       laufband.style.transform = laufbandVerschiebung(streifenLaengen[i], 0);
       walze.classList.add("laeuft");
     });
@@ -1216,12 +1456,16 @@ function starteSpiel() {
             klang(klangWalzenStopp, i);
             // Fällt auf einer Walze mit Spannung ein Tempeltor, leuchtet es sofort golden mit.
             if (plan.spannung) {
-              zielFeld[i].forEach((symbol, reihe) => { if (symbol === SCATTER) felderMarkieren([[i, reihe]], "scatter-spannung"); });
+              zielFeld[i].forEach((symbol, reihe) => {
+                if (symbol === SCATTER) felderMarkieren([[i, reihe]], "scatter-spannung");
+              });
             }
             return;
           }
-          walzenElemente[i].querySelector(".laufband").style.transform =
-            laufbandVerschiebung(streifenLaengen[i], vorschubZurZeit(plan, t));
+          walzenElemente[i].querySelector(".laufband").style.transform = laufbandVerschiebung(
+            streifenLaengen[i],
+            vorschubZurZeit(plan, t),
+          );
           nochAktiv++;
         });
         if (nochAktiv > 0) {
@@ -1255,7 +1499,10 @@ function starteSpiel() {
   function feldMitte(walzenNr, reihe) {
     const rahmen = walzenRahmen.getBoundingClientRect();
     const r = walzenElemente[walzenNr].getBoundingClientRect();
-    return { x: r.left - rahmen.left + r.width / 2, y: r.top - rahmen.top + ((reihe + 0.5) * r.height) / ANZAHL_REIHEN };
+    return {
+      x: r.left - rahmen.left + r.width / 2,
+      y: r.top - rahmen.top + ((reihe + 0.5) * r.height) / ANZAHL_REIHEN,
+    };
   }
 
   /**
@@ -1272,9 +1519,12 @@ function starteSpiel() {
     punkte.unshift({ x: 0, y: punkte[0].y });
     punkte.push({ x: rahmen.width, y: punkte[punkte.length - 1].y });
     const linie = document.createElementNS(SVG_NS, "polyline");
-    linie.setAttribute("points", punkte.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" "));
+    linie.setAttribute(
+      "points",
+      punkte.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" "),
+    );
     linie.setAttribute("class", "gewinn-linie");
-    linie.style.setProperty("--lc", linienAnzeige.farbe(liniennr));     // Linienfarbe wie beim Tab (siehe spiel.css)
+    linie.style.setProperty("--lc", linienAnzeige.farbe(liniennr)); // Linienfarbe wie beim Tab (siehe spiel.css)
     linienEbene.append(linie);
 
     // LICHTLAUF: Ein helles Lichtpaket läuft die Linie entlang. Technik: Dieselbe Linie noch einmal als
@@ -1282,7 +1532,10 @@ function starteSpiel() {
     // einem Strich-Muster aus "kurz an, lang aus". Die CSS-Animation schiebt das Muster per
     // stroke-dashoffset von 0 auf -1 entlang des Pfads (siehe spiel.css, @keyframes lichtlauf).
     const licht = document.createElementNS(SVG_NS, "path");
-    licht.setAttribute("d", "M" + punkte.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" L"));
+    licht.setAttribute(
+      "d",
+      "M" + punkte.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" L"),
+    );
     licht.setAttribute("pathLength", "1");
     licht.setAttribute("class", "gewinn-licht");
     linienEbene.append(licht);
@@ -1326,19 +1579,19 @@ function starteSpiel() {
       await warte(150);
       return;
     }
-    const dauer = Math.max(380, Math.min(850, 4200 / gewinne.length));   // viele Linien: pro Linie kürzer
+    const dauer = Math.max(380, Math.min(850, 4200 / gewinne.length)); // viele Linien: pro Linie kürzer
     for (const [nr, g] of gewinne.entries()) {
       if (nr > 0) klang(klangMuenzTick);
       linienEbene.replaceChildren();
       linieZeichnen(g.linie);
-      linienAnzeige.leuchten(g.linie);                 // der Tab dieser Linie leuchtet im Takt des Lichtlaufs
+      linienAnzeige.leuchten(g.linie); // der Tab dieser Linie leuchtet im Takt des Lichtlaufs
       felderMarkieren(g.positionen, "gewinn-blinken");
       tabelleHervorheben(g);
       drehInfo.textContent = linienGewinnText(g);
       await warte(dauer);
       felderMarkieren(g.positionen, "gewinn-blinken", false);
       felderMarkieren(g.positionen, "gewinn-dauer");
-      linienAnzeige.leuchten(g.linie, false);          // danach bleibt der Tab nur dezent als "gewonnen" markiert
+      linienAnzeige.leuchten(g.linie, false); // danach bleibt der Tab nur dezent als "gewonnen" markiert
       linienAnzeige.markieren(g.linie);
     }
     linienEbene.replaceChildren();
@@ -1366,9 +1619,10 @@ function starteSpiel() {
     felderMarkieren(fast.positionen, "scatter-spannung", false);
     felderMarkieren(fast.positionen, "knapp");
     klang(klangFastGewinn);
-    const text = fast.art === "scatter"
-      ? "So knapp! Zwei Tempeltore liegen, für die Freispiele fehlt das dritte."
-      : `So knapp! Das fünfte Symbol (${SYMBOL_NAMEN[fast.symbol]}) liegt direkt daneben.`;
+    const text =
+      fast.art === "scatter"
+        ? "So knapp! Zwei Tempeltore liegen, für die Freispiele fehlt das dritte."
+        : `So knapp! Das fünfte Symbol (${SYMBOL_NAMEN[fast.symbol]}) liegt direkt daneben.`;
     drehInfo.textContent = text;
     await warte(bewegungReduziert() ? 150 : 1000);
     return text;
@@ -1398,7 +1652,11 @@ function starteSpiel() {
     const reduziert = bewegungReduziert();
     const feld = sichtfeldAusStopps(stopps);
     const positionen = [];
-    feld.forEach((spalte, w) => spalte.forEach((s, r) => { if (s === expansion.symbol) positionen.push([w, r]); }));
+    feld.forEach((spalte, w) =>
+      spalte.forEach((s, r) => {
+        if (s === expansion.symbol) positionen.push([w, r]);
+      }),
+    );
     // Das Blinken ist Deko: Bei reduzierter Bewegung markieren wir die Felder nur still (gewinn-dauer).
     felderMarkieren(positionen, reduziert ? "gewinn-dauer" : "gewinn-blinken");
     drehInfo.textContent = `Expansion! ${SYMBOL_NAMEN[expansion.symbol]} füllt ${expansion.walzen.length === 1 ? "eine Walze" : `${expansion.walzen.length} Walzen`} …`;
@@ -1407,15 +1665,16 @@ function starteSpiel() {
     for (const w of expansion.walzen) {
       const ex = walzenElemente[w].querySelector(".expansion");
       ex.replaceChildren(...[0, 1, 2].map(() => zelleBauen(expansion.symbol)));
-      ex.classList.add("aktiv");                       // CSS-Animation "aufdecken" startet
+      ex.classList.add("aktiv"); // CSS-Animation "aufdecken" startet
       walzenElemente[w].classList.add("expandiert");
       await warte(reduziert ? 0 : 380);
     }
     felderMarkieren(positionen, "gewinn-blinken", false);
     await warte(reduziert ? 100 : 500);
-    drehInfo.textContent = expansion.betrag > 0
-      ? `${expansion.anzahl} × ${SYMBOL_NAMEN[expansion.symbol]} auf allen 10 Linien: +${zahlText(expansion.betrag)}`
-      : "Das Symbol expandiert, aber für eine Auszahlung reichen die Walzen nicht.";
+    drehInfo.textContent =
+      expansion.betrag > 0
+        ? `${expansion.anzahl} × ${SYMBOL_NAMEN[expansion.symbol]} auf allen 10 Linien: +${zahlText(expansion.betrag)}`
+        : "Das Symbol expandiert, aber für eine Auszahlung reichen die Walzen nicht.";
     await warte(reduziert ? 150 : 1100);
   }
 
@@ -1423,10 +1682,14 @@ function starteSpiel() {
   function zugText(e) {
     const teile = [];
     if (e.liniengewinne.length > 0) {
-      teile.push(`${e.liniengewinne.length} ${e.liniengewinne.length === 1 ? "Gewinnlinie" : "Gewinnlinien"}: +${zahlText(e.liniensumme)}`);
+      teile.push(
+        `${e.liniengewinne.length} ${e.liniengewinne.length === 1 ? "Gewinnlinie" : "Gewinnlinien"}: +${zahlText(e.liniensumme)}`,
+      );
     }
-    if (e.scatter.ausgeloest) teile.push(`${e.scatter.anzahl} Tempeltore: +${zahlText(e.scatter.betrag)}`);
-    if (e.expansion && e.expansion.betrag > 0) teile.push(`Expansion: +${zahlText(e.expansion.betrag)}`);
+    if (e.scatter.ausgeloest)
+      teile.push(`${e.scatter.anzahl} Tempeltore: +${zahlText(e.scatter.betrag)}`);
+    if (e.expansion && e.expansion.betrag > 0)
+      teile.push(`Expansion: +${zahlText(e.expansion.betrag)}`);
     return teile.length > 0 ? teile.join(" · ") : "Leider kein Treffer.";
   }
 
@@ -1449,7 +1712,11 @@ function starteSpiel() {
   function freispieleSichern() {
     if (!runde || runde.abgerechnet || runde.uebrig <= 0) return;
     speichere(SPIEL, "freispiele", {
-      einsatz: runde.einsatz, bisher: runde.bisher, uebrig: runde.uebrig, symbol: runde.symbol, gespielt: runde.gespielt,
+      einsatz: runde.einsatz,
+      bisher: runde.bisher,
+      uebrig: runde.uebrig,
+      symbol: runde.symbol,
+      gespielt: runde.gespielt,
     });
   }
 
@@ -1498,7 +1765,7 @@ function starteSpiel() {
     dialog.append(titel, text, betrag, aktionen);
 
     dialog.addEventListener("close", () => {
-      pleiteNeustart();                    // Konto zurück auf Startgeld, Pleiten-Zähler +1
+      pleiteNeustart(); // Konto zurück auf Startgeld, Pleiten-Zähler +1
       walletHudAktualisieren();
       dialog.remove();
       seiteAktualisieren();
@@ -1543,8 +1810,11 @@ function starteSpiel() {
     // Schritt b) und c) Expansion mit Zusatzauswertung (nur Freispiele)
     if (e.expansion && e.expansion.ausgeloest) await expansionZeigen(e.expansion);
 
-    drehInfo.textContent = zugText(e) + (zug.neueFreispiele > 0 && zug.istFreispiel ? ` · +${zug.neueFreispiele} Freispiele!` : "") + (knappText ? ` ${knappText}` : "");
-    gezeigterGewinn = runde.bisher;                 // jetzt darf der neue Stand sichtbar werden
+    drehInfo.textContent =
+      zugText(e) +
+      (zug.neueFreispiele > 0 && zug.istFreispiel ? ` · +${zug.neueFreispiele} Freispiele!` : "") +
+      (knappText ? ` ${knappText}` : "");
+    gezeigterGewinn = runde.bisher; // jetzt darf der neue Stand sichtbar werden
     if (zug.istFreispiel) {
       bannerAktualisieren();
       freispielGewinnAnzeigen();
@@ -1572,7 +1842,7 @@ function starteSpiel() {
 
   /** Einleitung nach dem auslösenden Dreh: Banner, Spezialsymbol ziehen, Hinweis. */
   async function freispieleEinleiten() {
-    klang(klangGewinn, 2);                                         // Freispiel-Start: der große Jingle (Stufe 2)
+    klang(klangGewinn, 2); // Freispiel-Start: der große Jingle (Stufe 2)
     hudFreispiele.textContent = String(runde.uebrig);
     bannerElement.hidden = false;
     buehneElement.classList.add("freispiel");
@@ -1611,8 +1881,7 @@ function starteSpiel() {
     walletHudAktualisieren();
     ergebnisAnzeigen(netto);
     if (hatteFreispiele) {
-      drehInfo.textContent =
-        `Freispiele beendet: ${zahlText(auszahlung)} Gesamtauszahlung bei ${zahlText(einsatz)} Einsatz (Netto ${netto >= 0 ? "+" : "−"}${zahlText(Math.abs(netto))}).`;
+      drehInfo.textContent = `Freispiele beendet: ${zahlText(auszahlung)} Gesamtauszahlung bei ${zahlText(einsatz)} Einsatz (Netto ${netto >= 0 ? "+" : "−"}${zahlText(Math.abs(netto))}).`;
     }
     freispielModusSetzen(false);
     runde = null;
@@ -1628,7 +1897,11 @@ function starteSpiel() {
   function nachRunde(fokusWar) {
     steuerungAktualisieren();
     // Der Knopf war beim Sperren fokussiert und hat den Fokus verloren: Tastatur-Nutzer zurück an die Stelle holen
-    if (fokusWar instanceof HTMLButtonElement && document.activeElement === document.body && !fokusWar.disabled) {
+    if (
+      fokusWar instanceof HTMLButtonElement &&
+      document.activeElement === document.body &&
+      !fokusWar.disabled
+    ) {
       fokusWar.focus({ preventScroll: true });
     }
     if (!runde && istPleite(EINSATZSTUFEN[0])) pleiteDialogZeigen();
@@ -1638,14 +1911,14 @@ function starteSpiel() {
   async function drehen() {
     if (laeuft || runde) return;
     const einsatz = wirksamerEinsatz();
-    if (einsatz === 0 || !einsatzAbbuchen(einsatz)) return;      // Konto reicht nicht: Dreh startet nicht
+    if (einsatz === 0 || !einsatzAbbuchen(einsatz)) return; // Konto reicht nicht: Dreh startet nicht
 
     laeuft = true;
     const fokusWar = document.activeElement;
     runde = { ...neueRunde(einsatz), abgerechnet: false };
     gezeigterGewinn = 0;
     hoechsteStufe = 0;
-    walletHudAktualisieren();                                    // der Einsatz verschwindet sofort vom Konto
+    walletHudAktualisieren(); // der Einsatz verschwindet sofort vom Konto
     steuerungAktualisieren();
     gewinnAnzeige.textContent = "";
     gewinnAnzeige.className = "gewinn-anzeige";
@@ -1698,8 +1971,8 @@ function starteSpiel() {
   });
 
   document.addEventListener("keydown", (e) => {
-    if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;   // Browser-Kürzel nicht stören, Dauerdruck ignorieren
-    if (document.querySelector("dialog[open]")) return;           // Dialog offen -> Tasten gehören ihm
+    if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return; // Browser-Kürzel nicht stören, Dauerdruck ignorieren
+    if (document.querySelector("dialog[open]")) return; // Dialog offen -> Tasten gehören ihm
     const tag = e.target instanceof Element ? e.target.tagName : "";
     if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
 
@@ -1707,10 +1980,10 @@ function starteSpiel() {
       // Auf einem fokussierten Knopf/Link/Aufklapper macht die Leertaste schon etwas
       // (anklicken). Dort NICHT zusätzlich drehen, sonst würde es doppelt ausgelöst.
       if (tag === "BUTTON" || tag === "A" || tag === "SUMMARY") return;
-      e.preventDefault();                                          // Seite nicht scrollen
+      e.preventDefault(); // Seite nicht scrollen
       knopfAktion();
     } else if (/^[1-9]$/.test(e.key) && Number(e.key) <= EINSATZSTUFEN.length) {
-      einsatzWaehlen(EINSATZSTUFEN[Number(e.key) - 1]);       // Taste 1 = erster Chip, 2 = zweiter …
+      einsatzWaehlen(EINSATZSTUFEN[Number(e.key) - 1]); // Taste 1 = erster Chip, 2 = zweiter …
     }
   });
 
@@ -1750,7 +2023,7 @@ function starteSpiel() {
 
   // ----- Start -----
   const kopfElement = document.querySelector(".spiel-kopf");
-  if (kopfElement) tonKnopf(kopfElement);                         // Ton an/aus, gilt für alle Casino-Spiele
+  if (kopfElement) tonKnopf(kopfElement); // Ton an/aus, gilt für alle Casino-Spiele
   walletHud(document.getElementById("wallet-hud"));
   baenderAufbauen();
   alleWalzenSetzen();
@@ -1766,12 +2039,12 @@ function starteSpiel() {
     freispielGewinnAnzeigen();
     drehInfo.textContent = `Gesicherte Freispiele warten: ${runde.uebrig} übrig, Spezialsymbol ${SYMBOL_NAMEN[runde.symbol]}.`;
   } else {
-    entferne(SPIEL, "freispiele");                 // ungültigen Rest aufräumen
+    entferne(SPIEL, "freispiele"); // ungültigen Rest aufräumen
   }
 
   steuerungAktualisieren();
   seiteAktualisieren();
-  if (!runde && istPleite(EINSATZSTUFEN[0])) pleiteDialogZeigen();       // z. B. nach Seitenwechsel mit leerem Konto
+  if (!runde && istPleite(EINSATZSTUFEN[0])) pleiteDialogZeigen(); // z. B. nach Seitenwechsel mit leerem Konto
 }
 
 // Nur im Browser starten. In Node (Tests/Simulation) gibt es kein "document" –

@@ -1,323 +1,1049 @@
 <!doctype html>
 <html lang="de">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#07070f">
-  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./assets/style.css">
-  <!-- Gewinnlinien-Tabs und Linien-Vorschau (gemeinsam mit Angelglück, Skript: ../assets/gewinnlinien.js) -->
-  <link rel="stylesheet" href="./assets/gewinnlinien.css">
-  <!-- spielspezifische Styles (Walzenfenster, Gewinnlinien, Freispiel-Banner, Tabellen) – das gemeinsame Design bleibt in ../assets/style.css -->
-  <link rel="stylesheet" href="./spiel.css">
-  <title>Tempelschatz · Browser-Arcade</title>
-  <meta name="description" content="Tempelschatz mit Spielgeld: ein Ägypten-Slot mit fünf Walzen, zehn Gewinnlinien und Freispielen mit expandierendem Symbol. Lerne nebenbei, wie Linien, Scatter und die Auszahlungsquote (RTP) funktionieren. Ohne Konto und Cookies.">
-</head>
-<body style="--ak:var(--gold)">
-  <div class="raster" aria-hidden="true"></div>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#07070f" />
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./assets/style.css" />
+    <!-- Gewinnlinien-Tabs und Linien-Vorschau (gemeinsam mit Angelglück, Skript: ../assets/gewinnlinien.js) -->
+    <link rel="stylesheet" href="./assets/gewinnlinien.css" />
+    <!-- spielspezifische Styles (Walzenfenster, Gewinnlinien, Freispiel-Banner, Tabellen) – das gemeinsame Design bleibt in ../assets/style.css -->
+    <link rel="stylesheet" href="./spiel.css" />
+    <title>Tempelschatz · Browser-Arcade</title>
+    <meta
+      name="description"
+      content="Tempelschatz mit Spielgeld: ein Ägypten-Slot mit fünf Walzen, zehn Gewinnlinien und Freispielen mit expandierendem Symbol. Lerne nebenbei, wie Linien, Scatter und die Auszahlungsquote (RTP) funktionieren. Ohne Konto und Cookies."
+    />
+  </head>
+  <body style="--ak: var(--gold)">
+    <div class="raster" aria-hidden="true"></div>
 
-  <!--
+    <!--
     SYMBOL-SPRITE: Die neun Symbole (acht Linien-Symbole plus das Tempeltor als Scatter) werden EINMAL hier
     als <symbol> definiert. game.js setzt sie dann per <use href="#sym-pharao"> beliebig oft ein
     (Walzen, Laufbänder, Banner und Gewinntabellen). Alle Zeichnungen sind eigene Inline-SVGs.
     Der Sprite ist unsichtbar, aber NICHT mit display:none versteckt: Manche Browser zeichnen
     Farbverläufe (gradient) aus display:none-SVGs nicht. Darum 0x0 Pixel groß, absolut positioniert.
   -->
-  <svg width="0" height="0" style="position:absolute;overflow:hidden" aria-hidden="true" focusable="false">
-    <defs>
-      <linearGradient id="tg-gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff0b0"/><stop offset=".5" stop-color="#ffc84d"/><stop offset="1" stop-color="#b97a10"/></linearGradient>
-      <linearGradient id="tg-lapis" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8fb4ff"/><stop offset=".55" stop-color="#2f5fe0"/><stop offset="1" stop-color="#142a7a"/></linearGradient>
-      <linearGradient id="tg-tuerkis" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b8fff4"/><stop offset=".5" stop-color="#19c9b5"/><stop offset="1" stop-color="#0a6b66"/></linearGradient>
-      <linearGradient id="tg-stein" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6d5a35"/><stop offset="1" stop-color="#30261a"/></linearGradient>
-      <linearGradient id="tg-sand" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#c9a468"/><stop offset=".5" stop-color="#e8cc92"/><stop offset="1" stop-color="#a47c46"/></linearGradient>
-      <radialGradient id="tg-tor" cx=".5" cy=".75" r=".75"><stop offset="0" stop-color="#ffffff"/><stop offset=".35" stop-color="#7ff6ff"/><stop offset="1" stop-color="#2742c9"/></radialGradient>
-      <radialGradient id="tg-sonne" cx=".4" cy=".35" r=".8"><stop offset="0" stop-color="#fff7c2"/><stop offset=".6" stop-color="#ffc84d"/><stop offset="1" stop-color="#d9850f"/></radialGradient>
-      <!-- Die Nemes-Kopftuch-Form der Pharao-Maske wird als Schablone für die Streifen benutzt -->
-      <clipPath id="tc-nemes"><path d="M32 5 C19 5 13 13 12 25 L9 57 H22 V38 H42 V57 H55 L52 25 C51 13 45 5 32 5 Z"/></clipPath>
-    </defs>
+    <svg
+      width="0"
+      height="0"
+      style="position: absolute; overflow: hidden"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <defs>
+        <linearGradient id="tg-gold" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#fff0b0" />
+          <stop offset=".5" stop-color="#ffc84d" />
+          <stop offset="1" stop-color="#b97a10" />
+        </linearGradient>
+        <linearGradient id="tg-lapis" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#8fb4ff" />
+          <stop offset=".55" stop-color="#2f5fe0" />
+          <stop offset="1" stop-color="#142a7a" />
+        </linearGradient>
+        <linearGradient id="tg-tuerkis" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#b8fff4" />
+          <stop offset=".5" stop-color="#19c9b5" />
+          <stop offset="1" stop-color="#0a6b66" />
+        </linearGradient>
+        <linearGradient id="tg-stein" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#6d5a35" />
+          <stop offset="1" stop-color="#30261a" />
+        </linearGradient>
+        <linearGradient id="tg-sand" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#c9a468" />
+          <stop offset=".5" stop-color="#e8cc92" />
+          <stop offset="1" stop-color="#a47c46" />
+        </linearGradient>
+        <radialGradient id="tg-tor" cx=".5" cy=".75" r=".75">
+          <stop offset="0" stop-color="#ffffff" />
+          <stop offset=".35" stop-color="#7ff6ff" />
+          <stop offset="1" stop-color="#2742c9" />
+        </radialGradient>
+        <radialGradient id="tg-sonne" cx=".4" cy=".35" r=".8">
+          <stop offset="0" stop-color="#fff7c2" />
+          <stop offset=".6" stop-color="#ffc84d" />
+          <stop offset="1" stop-color="#d9850f" />
+        </radialGradient>
+        <!-- Die Nemes-Kopftuch-Form der Pharao-Maske wird als Schablone für die Streifen benutzt -->
+        <clipPath id="tc-nemes">
+          <path d="M32 5 C19 5 13 13 12 25 L9 57 H22 V38 H42 V57 H55 L52 25 C51 13 45 5 32 5 Z" />
+        </clipPath>
+      </defs>
 
-    <!-- Hieroglyphen-Kartenwerte: eine Steintafel mit farbigem Rand und einem Zeichen. Die Farbe unterscheidet die Werte. -->
-    <!-- Zehn: das ägyptische Zahlzeichen für 10 (ein Bogen, "Fesselschlinge") -->
-    <symbol id="sym-zehn" viewBox="0 0 64 64">
-      <rect x="8" y="6" width="48" height="52" rx="9" fill="url(#tg-stein)" stroke="#38e0d0" stroke-width="2.5"/>
-      <rect x="12.5" y="10.5" width="39" height="43" rx="6" fill="none" stroke="#38e0d0" stroke-opacity=".3"/>
-      <path d="M21 47 V31 A11 11 0 0 1 43 31 V47" fill="none" stroke="#38e0d0" stroke-width="6.5" stroke-linecap="round"/>
-      <path d="M26 47 V32 A6 6 0 0 1 38 32 V47" fill="none" stroke="#b8fff4" stroke-opacity=".45" stroke-width="1.6" stroke-linecap="round"/>
-    </symbol>
+      <!-- Hieroglyphen-Kartenwerte: eine Steintafel mit farbigem Rand und einem Zeichen. Die Farbe unterscheidet die Werte. -->
+      <!-- Zehn: das ägyptische Zahlzeichen für 10 (ein Bogen, "Fesselschlinge") -->
+      <symbol id="sym-zehn" viewBox="0 0 64 64">
+        <rect
+          x="8"
+          y="6"
+          width="48"
+          height="52"
+          rx="9"
+          fill="url(#tg-stein)"
+          stroke="#38e0d0"
+          stroke-width="2.5"
+        />
+        <rect
+          x="12.5"
+          y="10.5"
+          width="39"
+          height="43"
+          rx="6"
+          fill="none"
+          stroke="#38e0d0"
+          stroke-opacity=".3"
+        />
+        <path
+          d="M21 47 V31 A11 11 0 0 1 43 31 V47"
+          fill="none"
+          stroke="#38e0d0"
+          stroke-width="6.5"
+          stroke-linecap="round"
+        />
+        <path
+          d="M26 47 V32 A6 6 0 0 1 38 32 V47"
+          fill="none"
+          stroke="#b8fff4"
+          stroke-opacity=".45"
+          stroke-width="1.6"
+          stroke-linecap="round"
+        />
+      </symbol>
 
-    <!-- Bube (B): das Fuß-Zeichen, im Ägyptischen der Laut "b" -->
-    <symbol id="sym-bube" viewBox="0 0 64 64">
-      <rect x="8" y="6" width="48" height="52" rx="9" fill="url(#tg-stein)" stroke="#6f9bff" stroke-width="2.5"/>
-      <rect x="12.5" y="10.5" width="39" height="43" rx="6" fill="none" stroke="#6f9bff" stroke-opacity=".3"/>
-      <path d="M22 14 H35 V37 H47 Q52 37 52 42 Q52 47 47 47 H22 Z" fill="#6f9bff"/>
-      <path d="M26 18 V43" stroke="#d5e3ff" stroke-opacity=".5" stroke-width="2" stroke-linecap="round"/>
-    </symbol>
+      <!-- Bube (B): das Fuß-Zeichen, im Ägyptischen der Laut "b" -->
+      <symbol id="sym-bube" viewBox="0 0 64 64">
+        <rect
+          x="8"
+          y="6"
+          width="48"
+          height="52"
+          rx="9"
+          fill="url(#tg-stein)"
+          stroke="#6f9bff"
+          stroke-width="2.5"
+        />
+        <rect
+          x="12.5"
+          y="10.5"
+          width="39"
+          height="43"
+          rx="6"
+          fill="none"
+          stroke="#6f9bff"
+          stroke-opacity=".3"
+        />
+        <path d="M22 14 H35 V37 H47 Q52 37 52 42 Q52 47 47 47 H22 Z" fill="#6f9bff" />
+        <path
+          d="M26 18 V43"
+          stroke="#d5e3ff"
+          stroke-opacity=".5"
+          stroke-width="2"
+          stroke-linecap="round"
+        />
+      </symbol>
 
-    <!-- Dame (D): Unterarm mit Hand, im Ägyptischen der Laut "d" -->
-    <symbol id="sym-dame" viewBox="0 0 64 64">
-      <rect x="8" y="6" width="48" height="52" rx="9" fill="url(#tg-stein)" stroke="#ff7ab8" stroke-width="2.5"/>
-      <rect x="12.5" y="10.5" width="39" height="43" rx="6" fill="none" stroke="#ff7ab8" stroke-opacity=".3"/>
-      <path d="M13 28 H32 V37 H13 Z" fill="#ff7ab8"/>
-      <path d="M32 24 H44 Q49 24 49 29 V36 Q49 41 44 41 H32 Z" fill="#ff7ab8"/>
-      <path d="M46 29 H53 M46 33 H53 M46 37 H52" stroke="#ff7ab8" stroke-width="3" stroke-linecap="round"/>
-      <path d="M36 27.5 H44" stroke="#ffd3e8" stroke-opacity=".55" stroke-width="2" stroke-linecap="round"/>
-    </symbol>
+      <!-- Dame (D): Unterarm mit Hand, im Ägyptischen der Laut "d" -->
+      <symbol id="sym-dame" viewBox="0 0 64 64">
+        <rect
+          x="8"
+          y="6"
+          width="48"
+          height="52"
+          rx="9"
+          fill="url(#tg-stein)"
+          stroke="#ff7ab8"
+          stroke-width="2.5"
+        />
+        <rect
+          x="12.5"
+          y="10.5"
+          width="39"
+          height="43"
+          rx="6"
+          fill="none"
+          stroke="#ff7ab8"
+          stroke-opacity=".3"
+        />
+        <path d="M13 28 H32 V37 H13 Z" fill="#ff7ab8" />
+        <path d="M32 24 H44 Q49 24 49 29 V36 Q49 41 44 41 H32 Z" fill="#ff7ab8" />
+        <path
+          d="M46 29 H53 M46 33 H53 M46 37 H52"
+          stroke="#ff7ab8"
+          stroke-width="3"
+          stroke-linecap="round"
+        />
+        <path
+          d="M36 27.5 H44"
+          stroke="#ffd3e8"
+          stroke-opacity=".55"
+          stroke-width="2"
+          stroke-linecap="round"
+        />
+      </symbol>
 
-    <!-- König (K): der Henkelkorb, im Ägyptischen der Laut "k" -->
-    <symbol id="sym-koenig" viewBox="0 0 64 64">
-      <rect x="8" y="6" width="48" height="52" rx="9" fill="url(#tg-stein)" stroke="#7be36a" stroke-width="2.5"/>
-      <rect x="12.5" y="10.5" width="39" height="43" rx="6" fill="none" stroke="#7be36a" stroke-opacity=".3"/>
-      <path d="M17 29 H47 Q46 47 32 47 Q18 47 17 29 Z" fill="#7be36a"/>
-      <path d="M23 29 Q23 17 32 17 Q41 17 41 29" fill="none" stroke="#7be36a" stroke-width="4" stroke-linecap="round"/>
-      <path d="M21 35 H43 M24 41 H40" stroke="#1d3a17" stroke-opacity=".6" stroke-width="2" stroke-linecap="round"/>
-    </symbol>
+      <!-- König (K): der Henkelkorb, im Ägyptischen der Laut "k" -->
+      <symbol id="sym-koenig" viewBox="0 0 64 64">
+        <rect
+          x="8"
+          y="6"
+          width="48"
+          height="52"
+          rx="9"
+          fill="url(#tg-stein)"
+          stroke="#7be36a"
+          stroke-width="2.5"
+        />
+        <rect
+          x="12.5"
+          y="10.5"
+          width="39"
+          height="43"
+          rx="6"
+          fill="none"
+          stroke="#7be36a"
+          stroke-opacity=".3"
+        />
+        <path d="M17 29 H47 Q46 47 32 47 Q18 47 17 29 Z" fill="#7be36a" />
+        <path
+          d="M23 29 Q23 17 32 17 Q41 17 41 29"
+          fill="none"
+          stroke="#7be36a"
+          stroke-width="4"
+          stroke-linecap="round"
+        />
+        <path
+          d="M21 35 H43 M24 41 H40"
+          stroke="#1d3a17"
+          stroke-opacity=".6"
+          stroke-width="2"
+          stroke-linecap="round"
+        />
+      </symbol>
 
-    <!-- Ass (A): der Geier, im Ägyptischen der Laut "a" -->
-    <symbol id="sym-ass" viewBox="0 0 64 64">
-      <rect x="8" y="6" width="48" height="52" rx="9" fill="url(#tg-stein)" stroke="#ffb02e" stroke-width="2.5"/>
-      <rect x="12.5" y="10.5" width="39" height="43" rx="6" fill="none" stroke="#ffb02e" stroke-opacity=".3"/>
-      <path d="M14 40 L26 30 Q34 25 41 27 Q41 19 47 17 Q52 17 53 21 L49 23 Q50 29 44 34 Q38 42 24 43 Z" fill="#ffb02e"/>
-      <path d="M26 43 L24 50 M33 42 L33 50" stroke="#ffb02e" stroke-width="2.6" stroke-linecap="round"/>
-      <circle cx="47.5" cy="20.5" r="1.3" fill="#30261a"/>
-      <path d="M22 37 Q30 31 37 32" fill="none" stroke="#fff1cc" stroke-opacity=".55" stroke-width="2" stroke-linecap="round"/>
-    </symbol>
+      <!-- Ass (A): der Geier, im Ägyptischen der Laut "a" -->
+      <symbol id="sym-ass" viewBox="0 0 64 64">
+        <rect
+          x="8"
+          y="6"
+          width="48"
+          height="52"
+          rx="9"
+          fill="url(#tg-stein)"
+          stroke="#ffb02e"
+          stroke-width="2.5"
+        />
+        <rect
+          x="12.5"
+          y="10.5"
+          width="39"
+          height="43"
+          rx="6"
+          fill="none"
+          stroke="#ffb02e"
+          stroke-opacity=".3"
+        />
+        <path
+          d="M14 40 L26 30 Q34 25 41 27 Q41 19 47 17 Q52 17 53 21 L49 23 Q50 29 44 34 Q38 42 24 43 Z"
+          fill="#ffb02e"
+        />
+        <path
+          d="M26 43 L24 50 M33 42 L33 50"
+          stroke="#ffb02e"
+          stroke-width="2.6"
+          stroke-linecap="round"
+        />
+        <circle cx="47.5" cy="20.5" r="1.3" fill="#30261a" />
+        <path
+          d="M22 37 Q30 31 37 32"
+          fill="none"
+          stroke="#fff1cc"
+          stroke-opacity=".55"
+          stroke-width="2"
+          stroke-linecap="round"
+        />
+      </symbol>
 
-    <!-- Skarabäus: Käfer mit Sonnenscheibe -->
-    <symbol id="sym-skarabaeus" viewBox="0 0 64 64">
-      <g stroke="#ffc84d" stroke-width="3.2" stroke-linecap="round" fill="none">
-        <path d="M20 33 L9 28 M19 41 L7 43 M22 49 L12 57 M44 33 L55 28 M45 41 L57 43 M42 49 L52 57"/>
-      </g>
-      <circle cx="32" cy="10" r="7" fill="url(#tg-sonne)" stroke="#b96f0a" stroke-width="1.2"/>
-      <ellipse cx="32" cy="38" rx="15.5" ry="18" fill="url(#tg-tuerkis)" stroke="#ffc84d" stroke-width="2.2"/>
-      <path d="M21 24 Q32 16 43 24 Q39 30 32 30 Q25 30 21 24 Z" fill="url(#tg-gold)" stroke="#b96f0a" stroke-width="1"/>
-      <path d="M32 31 V55" stroke="#0a4a47" stroke-width="2"/>
-      <path d="M21 38 Q25 33 32 35 M43 38 Q39 33 32 35 M22 47 Q27 42 32 44 M42 47 Q37 42 32 44" fill="none" stroke="#0a4a47" stroke-opacity=".75" stroke-width="1.6" stroke-linecap="round"/>
-      <path d="M23 36 Q22 42 25 47" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="2.4" stroke-linecap="round"/>
-    </symbol>
+      <!-- Skarabäus: Käfer mit Sonnenscheibe -->
+      <symbol id="sym-skarabaeus" viewBox="0 0 64 64">
+        <g stroke="#ffc84d" stroke-width="3.2" stroke-linecap="round" fill="none">
+          <path
+            d="M20 33 L9 28 M19 41 L7 43 M22 49 L12 57 M44 33 L55 28 M45 41 L57 43 M42 49 L52 57"
+          />
+        </g>
+        <circle cx="32" cy="10" r="7" fill="url(#tg-sonne)" stroke="#b96f0a" stroke-width="1.2" />
+        <ellipse
+          cx="32"
+          cy="38"
+          rx="15.5"
+          ry="18"
+          fill="url(#tg-tuerkis)"
+          stroke="#ffc84d"
+          stroke-width="2.2"
+        />
+        <path
+          d="M21 24 Q32 16 43 24 Q39 30 32 30 Q25 30 21 24 Z"
+          fill="url(#tg-gold)"
+          stroke="#b96f0a"
+          stroke-width="1"
+        />
+        <path d="M32 31 V55" stroke="#0a4a47" stroke-width="2" />
+        <path
+          d="M21 38 Q25 33 32 35 M43 38 Q39 33 32 35 M22 47 Q27 42 32 44 M42 47 Q37 42 32 44"
+          fill="none"
+          stroke="#0a4a47"
+          stroke-opacity=".75"
+          stroke-width="1.6"
+          stroke-linecap="round"
+        />
+        <path
+          d="M23 36 Q22 42 25 47"
+          fill="none"
+          stroke="#fff"
+          stroke-opacity=".55"
+          stroke-width="2.4"
+          stroke-linecap="round"
+        />
+      </symbol>
 
-    <!-- Horusfalke: Kopf im Profil mit Sonnenscheibe, Horus-Auge-Zeichnung und Brustkragen -->
-    <symbol id="sym-falke" viewBox="0 0 64 64">
-      <path d="M10 57 Q32 36 54 57 Z" fill="url(#tg-gold)" stroke="#b96f0a" stroke-width="1.4" stroke-linejoin="round"/>
-      <path d="M17 54 Q32 41 47 54 M22 56 Q32 47 42 56" fill="none" stroke="#2f5fe0" stroke-width="2.2"/>
-      <path d="M22 48 L20 33 Q18 20 27 13 Q37 7 47 12 Q55 17 53 29 L50 48 Z" fill="url(#tg-lapis)" stroke="#d8e4ff" stroke-width="1.4" stroke-linejoin="round"/>
-      <path d="M27 21 Q14 21 11 33 Q18 29 28 31 Z" fill="url(#tg-gold)" stroke="#b96f0a" stroke-width="1.3" stroke-linejoin="round"/>
-      <circle cx="34" cy="22" r="4.6" fill="#fff6d6" stroke="#0e1c58" stroke-width="1.6"/>
-      <circle cx="33.4" cy="22.2" r="2.1" fill="#0e1c58"/>
-      <path d="M31 27 Q31 36 24 38 M37 26 Q41 31 38 38" fill="none" stroke="#ffc84d" stroke-width="2.4" stroke-linecap="round"/>
-      <circle cx="42" cy="9" r="5.5" fill="url(#tg-sonne)" stroke="#b96f0a" stroke-width="1.1"/>
-    </symbol>
+      <!-- Horusfalke: Kopf im Profil mit Sonnenscheibe, Horus-Auge-Zeichnung und Brustkragen -->
+      <symbol id="sym-falke" viewBox="0 0 64 64">
+        <path
+          d="M10 57 Q32 36 54 57 Z"
+          fill="url(#tg-gold)"
+          stroke="#b96f0a"
+          stroke-width="1.4"
+          stroke-linejoin="round"
+        />
+        <path
+          d="M17 54 Q32 41 47 54 M22 56 Q32 47 42 56"
+          fill="none"
+          stroke="#2f5fe0"
+          stroke-width="2.2"
+        />
+        <path
+          d="M22 48 L20 33 Q18 20 27 13 Q37 7 47 12 Q55 17 53 29 L50 48 Z"
+          fill="url(#tg-lapis)"
+          stroke="#d8e4ff"
+          stroke-width="1.4"
+          stroke-linejoin="round"
+        />
+        <path
+          d="M27 21 Q14 21 11 33 Q18 29 28 31 Z"
+          fill="url(#tg-gold)"
+          stroke="#b96f0a"
+          stroke-width="1.3"
+          stroke-linejoin="round"
+        />
+        <circle cx="34" cy="22" r="4.6" fill="#fff6d6" stroke="#0e1c58" stroke-width="1.6" />
+        <circle cx="33.4" cy="22.2" r="2.1" fill="#0e1c58" />
+        <path
+          d="M31 27 Q31 36 24 38 M37 26 Q41 31 38 38"
+          fill="none"
+          stroke="#ffc84d"
+          stroke-width="2.4"
+          stroke-linecap="round"
+        />
+        <circle cx="42" cy="9" r="5.5" fill="url(#tg-sonne)" stroke="#b96f0a" stroke-width="1.1" />
+      </symbol>
 
-    <!-- Pharao-Maske: gestreiftes Kopftuch (Nemes), Goldgesicht, Zeremonialbart, Uräusschlange -->
-    <symbol id="sym-pharao" viewBox="0 0 64 64">
-      <path d="M32 5 C19 5 13 13 12 25 L9 57 H22 V38 H42 V57 H55 L52 25 C51 13 45 5 32 5 Z" fill="#14307f"/>
-      <g clip-path="url(#tc-nemes)" fill="url(#tg-gold)">
-        <rect x="0" y="9" width="64" height="4"/><rect x="0" y="17" width="64" height="4"/><rect x="0" y="25" width="64" height="4"/>
-        <rect x="0" y="33" width="64" height="4"/><rect x="0" y="41" width="64" height="4"/><rect x="0" y="49" width="64" height="4"/>
-      </g>
-      <path d="M32 5 C19 5 13 13 12 25 L9 57 H22 V38 H42 V57 H55 L52 25 C51 13 45 5 32 5 Z" fill="none" stroke="#ffe9a0" stroke-width="1.6" stroke-linejoin="round"/>
-      <ellipse cx="32" cy="31" rx="10.5" ry="13.5" fill="url(#tg-gold)" stroke="#b96f0a" stroke-width="1.3"/>
-      <path d="M25 27 H30 M34 27 H39" stroke="#0e1c58" stroke-width="2.6" stroke-linecap="round"/>
-      <path d="M22.5 27 H24 M40 27 H41.5" stroke="#0e1c58" stroke-width="1.6" stroke-linecap="round"/>
-      <path d="M32 29 V35 M30 36 Q32 37.5 34 36" fill="none" stroke="#b96f0a" stroke-width="1.5" stroke-linecap="round"/>
-      <path d="M28.5 40.5 Q32 42.5 35.5 40.5" fill="none" stroke="#a3410f" stroke-width="1.8" stroke-linecap="round"/>
-      <path d="M29 44 H35 L36 58 H28 Z" fill="url(#tg-lapis)" stroke="#ffe9a0" stroke-width="1.1"/>
-      <path d="M32 3 Q27 6 29.5 11 Q32 9 34.5 11 Q37 6 32 3 Z" fill="url(#tg-sonne)" stroke="#a3410f" stroke-width="1"/>
-    </symbol>
+      <!-- Pharao-Maske: gestreiftes Kopftuch (Nemes), Goldgesicht, Zeremonialbart, Uräusschlange -->
+      <symbol id="sym-pharao" viewBox="0 0 64 64">
+        <path
+          d="M32 5 C19 5 13 13 12 25 L9 57 H22 V38 H42 V57 H55 L52 25 C51 13 45 5 32 5 Z"
+          fill="#14307f"
+        />
+        <g clip-path="url(#tc-nemes)" fill="url(#tg-gold)">
+          <rect x="0" y="9" width="64" height="4" />
+          <rect x="0" y="17" width="64" height="4" />
+          <rect x="0" y="25" width="64" height="4" />
+          <rect x="0" y="33" width="64" height="4" />
+          <rect x="0" y="41" width="64" height="4" />
+          <rect x="0" y="49" width="64" height="4" />
+        </g>
+        <path
+          d="M32 5 C19 5 13 13 12 25 L9 57 H22 V38 H42 V57 H55 L52 25 C51 13 45 5 32 5 Z"
+          fill="none"
+          stroke="#ffe9a0"
+          stroke-width="1.6"
+          stroke-linejoin="round"
+        />
+        <ellipse
+          cx="32"
+          cy="31"
+          rx="10.5"
+          ry="13.5"
+          fill="url(#tg-gold)"
+          stroke="#b96f0a"
+          stroke-width="1.3"
+        />
+        <path
+          d="M25 27 H30 M34 27 H39"
+          stroke="#0e1c58"
+          stroke-width="2.6"
+          stroke-linecap="round"
+        />
+        <path
+          d="M22.5 27 H24 M40 27 H41.5"
+          stroke="#0e1c58"
+          stroke-width="1.6"
+          stroke-linecap="round"
+        />
+        <path
+          d="M32 29 V35 M30 36 Q32 37.5 34 36"
+          fill="none"
+          stroke="#b96f0a"
+          stroke-width="1.5"
+          stroke-linecap="round"
+        />
+        <path
+          d="M28.5 40.5 Q32 42.5 35.5 40.5"
+          fill="none"
+          stroke="#a3410f"
+          stroke-width="1.8"
+          stroke-linecap="round"
+        />
+        <path
+          d="M29 44 H35 L36 58 H28 Z"
+          fill="url(#tg-lapis)"
+          stroke="#ffe9a0"
+          stroke-width="1.1"
+        />
+        <path
+          d="M32 3 Q27 6 29.5 11 Q32 9 34.5 11 Q37 6 32 3 Z"
+          fill="url(#tg-sonne)"
+          stroke="#a3410f"
+          stroke-width="1"
+        />
+      </symbol>
 
-    <!-- Tempeltor (Scatter): zwei Türme mit Querbalken, leuchtender Durchgang und Sonnenscheibe -->
-    <symbol id="sym-tor" viewBox="0 0 64 64">
-      <path d="M32 2 L33.2 7 L38 5.5 L35.4 9.6 L40 11.5 L34.6 12.6 L33 17 L32 12.8 L31 17 L29.4 12.6 L24 11.5 L28.6 9.6 L26 5.5 L30.8 7 Z" fill="#ffe27a" opacity=".95"/>
-      <path d="M7 58 L11 22 H26 V58 Z" fill="url(#tg-sand)" stroke="#7a5a2c" stroke-width="1.4" stroke-linejoin="round"/>
-      <path d="M57 58 L53 22 H38 V58 Z" fill="url(#tg-sand)" stroke="#7a5a2c" stroke-width="1.4" stroke-linejoin="round"/>
-      <rect x="9" y="15" width="46" height="8" rx="2" fill="url(#tg-gold)" stroke="#b96f0a" stroke-width="1.3"/>
-      <path d="M26 58 V34 Q32 24 38 34 V58 Z" fill="url(#tg-tor)" stroke="#e8fdff" stroke-width="1.3"/>
-      <path d="M15 30 V38 M20 30 V38 M44 30 V38 M49 30 V38" stroke="#7a5a2c" stroke-width="2" stroke-linecap="round" opacity=".65"/>
-      <path d="M6 58 H58" stroke="#ffc84d" stroke-width="2.4" stroke-linecap="round"/>
-    </symbol>
-  </svg>
+      <!-- Tempeltor (Scatter): zwei Türme mit Querbalken, leuchtender Durchgang und Sonnenscheibe -->
+      <symbol id="sym-tor" viewBox="0 0 64 64">
+        <path
+          d="M32 2 L33.2 7 L38 5.5 L35.4 9.6 L40 11.5 L34.6 12.6 L33 17 L32 12.8 L31 17 L29.4 12.6 L24 11.5 L28.6 9.6 L26 5.5 L30.8 7 Z"
+          fill="#ffe27a"
+          opacity=".95"
+        />
+        <path
+          d="M7 58 L11 22 H26 V58 Z"
+          fill="url(#tg-sand)"
+          stroke="#7a5a2c"
+          stroke-width="1.4"
+          stroke-linejoin="round"
+        />
+        <path
+          d="M57 58 L53 22 H38 V58 Z"
+          fill="url(#tg-sand)"
+          stroke="#7a5a2c"
+          stroke-width="1.4"
+          stroke-linejoin="round"
+        />
+        <rect
+          x="9"
+          y="15"
+          width="46"
+          height="8"
+          rx="2"
+          fill="url(#tg-gold)"
+          stroke="#b96f0a"
+          stroke-width="1.3"
+        />
+        <path
+          d="M26 58 V34 Q32 24 38 34 V58 Z"
+          fill="url(#tg-tor)"
+          stroke="#e8fdff"
+          stroke-width="1.3"
+        />
+        <path
+          d="M15 30 V38 M20 30 V38 M44 30 V38 M49 30 V38"
+          stroke="#7a5a2c"
+          stroke-width="2"
+          stroke-linecap="round"
+          opacity=".65"
+        />
+        <path d="M6 58 H58" stroke="#ffc84d" stroke-width="2.4" stroke-linecap="round" />
+      </symbol>
+    </svg>
 
-  <a class="skip-link" href="#main">Zum Inhalt springen</a>
-  <header class="kopf"><nav class="container nav" aria-label="Hauptnavigation">
-    <a class="marke" href="./"><span class="logo">▶</span>GAMES</a>
-    <div class="nav-links"><a href="./impressum.html">Impressum</a><a href="./datenschutz.html">Datenschutz</a></div>
-  </nav></header>
-  <main id="main" class="container">
-    <div class="spiel-kopf"><div><h1>TEMPELSCHATZ</h1><p class="unterzeile">Fünf Walzen, zehn Gewinnlinien und Freispiele mit expandierendem Symbol. Wähle deinen Einsatz und drehe.</p><p class="alters-hinweis">Simuliertes Glücksspiel mit Spielgeld · ab 16</p></div></div>
+    <a class="skip-link" href="#main">Zum Inhalt springen</a>
+    <header class="kopf">
+      <nav class="container nav" aria-label="Hauptnavigation">
+        <a class="marke" href="./"><span class="logo">▶</span>GAMES</a>
+        <div class="nav-links">
+          <a href="./impressum.html">Impressum</a><a href="./datenschutz.html">Datenschutz</a>
+        </div>
+      </nav>
+    </header>
+    <main id="main" class="container">
+      <div class="spiel-kopf">
+        <div>
+          <h1>TEMPELSCHATZ</h1>
+          <p class="unterzeile">
+            Fünf Walzen, zehn Gewinnlinien und Freispiele mit expandierendem Symbol. Wähle deinen
+            Einsatz und drehe.
+          </p>
+          <p class="alters-hinweis">Simuliertes Glücksspiel mit Spielgeld · ab 16</p>
+        </div>
+      </div>
 
-    <!-- HUD: Wallet-Leiste (von wallet.js gefüllt) + Felder für den letzten Dreh und die Freispiele.
+      <!-- HUD: Wallet-Leiste (von wallet.js gefüllt) + Felder für den letzten Dreh und die Freispiele.
          #wallet-hud hat display:contents (siehe spiel.css), damit seine drei Felder
          direkt in der .hud-Flexbox mitlaufen. -->
-    <div class="hud">
-      <div id="wallet-hud"></div>
-      <div class="hud-feld"><div class="label">Letzter Dreh</div><div class="wert" id="hud-letzter">–</div></div>
-      <div class="hud-feld"><div class="label">Freispiele</div><div class="wert" id="hud-freispiele">–</div></div>
-    </div>
-
-    <div class="buehne" id="buehne">
-      <!-- Freispiel-Banner: zeigt das gezogene Spezialsymbol, die übrigen Freispiele und den Rundengewinn. Nur in Freispielen sichtbar. -->
-      <div class="freispiel-banner" id="freispiel-banner" hidden>
-        <div class="banner-symbol" id="banner-symbol" aria-hidden="true"></div>
-        <div class="banner-text"><strong>FREISPIELE</strong><span>Spezialsymbol: <b id="banner-name"></b></span></div>
-        <div class="banner-zahlen"><span>Übrig<b id="banner-uebrig">0</b></span><span>Gewinn<b id="banner-gewinn">0</b></span></div>
+      <div class="hud">
+        <div id="wallet-hud"></div>
+        <div class="hud-feld">
+          <div class="label">Letzter Dreh</div>
+          <div class="wert" id="hud-letzter">–</div>
+        </div>
+        <div class="hud-feld">
+          <div class="label">Freispiele</div>
+          <div class="wert" id="hud-freispiele">–</div>
+        </div>
       </div>
 
-      <!-- Das 5x3-Fenster: fünf Walzen, jede zeigt 3 Symbole. Bänder, Laufbänder und Expansions-Ebenen füllt game.js.
-           Die Linien-Ebene (SVG) liegt über den Walzen und zeichnet die gewinnenden Linien.
-           Links und rechts daneben sitzen die Nummern-Tabs der 10 Gewinnlinien (leer, game.js baut sie aus GEWINNLINIEN). -->
-      <div class="fenster-zeile" id="fenster-zeile">
-        <div class="linien-tabs links" id="tabs-links"></div>
-        <div class="walzenfenster" id="fenster" role="img" aria-label="Walzen" data-gewinnfeier-fokus>
-          <div class="walzen" id="walzen">
-            <div class="walze"><div class="band"></div><div class="laufband"></div><div class="expansion"></div></div>
-            <div class="walze"><div class="band"></div><div class="laufband"></div><div class="expansion"></div></div>
-            <div class="walze"><div class="band"></div><div class="laufband"></div><div class="expansion"></div></div>
-            <div class="walze"><div class="band"></div><div class="laufband"></div><div class="expansion"></div></div>
-            <div class="walze"><div class="band"></div><div class="laufband"></div><div class="expansion"></div></div>
-            <svg class="linien-ebene" id="linien-ebene" aria-hidden="true" focusable="false"></svg>
+      <div class="buehne" id="buehne">
+        <!-- Freispiel-Banner: zeigt das gezogene Spezialsymbol, die übrigen Freispiele und den Rundengewinn. Nur in Freispielen sichtbar. -->
+        <div class="freispiel-banner" id="freispiel-banner" hidden>
+          <div class="banner-symbol" id="banner-symbol" aria-hidden="true"></div>
+          <div class="banner-text">
+            <strong>FREISPIELE</strong><span>Spezialsymbol: <b id="banner-name"></b></span>
+          </div>
+          <div class="banner-zahlen">
+            <span>Übrig<b id="banner-uebrig">0</b></span
+            ><span>Gewinn<b id="banner-gewinn">0</b></span>
           </div>
         </div>
-        <div class="linien-tabs rechts" id="tabs-rechts"></div>
-      </div>
 
-      <p class="gewinn-anzeige" id="gewinn-anzeige"></p>
-      <p class="dreh-info" id="dreh-info" aria-live="polite">Wähle deinen Einsatz und dreh die Walzen.</p>
-
-      <div class="einsatz-zeile">
-        <span class="einsatz-label" id="einsatz-label">Einsatz (gesamt)</span>
-        <div class="chips" role="group" aria-labelledby="einsatz-label">
-          <button class="chip" type="button" data-einsatz="10" aria-pressed="false">10</button>
-          <button class="chip" type="button" data-einsatz="25" aria-pressed="false">25</button>
-          <button class="chip" type="button" data-einsatz="50" aria-pressed="false">50</button>
-          <button class="chip" type="button" data-einsatz="100" aria-pressed="false">100</button>
+        <!-- Das 5x3-Fenster: fünf Walzen, jede zeigt 3 Symbole. Bänder, Laufbänder und Expansions-Ebenen füllt game.js.
+           Die Linien-Ebene (SVG) liegt über den Walzen und zeichnet die gewinnenden Linien.
+           Links und rechts daneben sitzen die Nummern-Tabs der 10 Gewinnlinien (leer, game.js baut sie aus GEWINNLINIEN). -->
+        <div class="fenster-zeile" id="fenster-zeile">
+          <div class="linien-tabs links" id="tabs-links"></div>
+          <div
+            class="walzenfenster"
+            id="fenster"
+            role="img"
+            aria-label="Walzen"
+            data-gewinnfeier-fokus
+          >
+            <div class="walzen" id="walzen">
+              <div class="walze">
+                <div class="band"></div>
+                <div class="laufband"></div>
+                <div class="expansion"></div>
+              </div>
+              <div class="walze">
+                <div class="band"></div>
+                <div class="laufband"></div>
+                <div class="expansion"></div>
+              </div>
+              <div class="walze">
+                <div class="band"></div>
+                <div class="laufband"></div>
+                <div class="expansion"></div>
+              </div>
+              <div class="walze">
+                <div class="band"></div>
+                <div class="laufband"></div>
+                <div class="expansion"></div>
+              </div>
+              <div class="walze">
+                <div class="band"></div>
+                <div class="laufband"></div>
+                <div class="expansion"></div>
+              </div>
+              <svg
+                class="linien-ebene"
+                id="linien-ebene"
+                aria-hidden="true"
+                focusable="false"
+              ></svg>
+            </div>
+          </div>
+          <div class="linien-tabs rechts" id="tabs-rechts"></div>
         </div>
-        <p class="klein" id="linien-einsatz"></p>
+
+        <p class="gewinn-anzeige" id="gewinn-anzeige"></p>
+        <p class="dreh-info" id="dreh-info" aria-live="polite">
+          Wähle deinen Einsatz und dreh die Walzen.
+        </p>
+
+        <div class="einsatz-zeile">
+          <span class="einsatz-label" id="einsatz-label">Einsatz (gesamt)</span>
+          <div class="chips" role="group" aria-labelledby="einsatz-label">
+            <button class="chip" type="button" data-einsatz="10" aria-pressed="false">10</button>
+            <button class="chip" type="button" data-einsatz="25" aria-pressed="false">25</button>
+            <button class="chip" type="button" data-einsatz="50" aria-pressed="false">50</button>
+            <button class="chip" type="button" data-einsatz="100" aria-pressed="false">100</button>
+          </div>
+          <p class="klein" id="linien-einsatz"></p>
+        </div>
+        <div class="dreh-zeile">
+          <button class="knopf primaer dreh-knopf" id="dreh-knopf" type="button">DREHEN</button>
+        </div>
+
+        <div class="tabelle" data-gewinnfeier-bis>
+          <h2>Gewinntabelle</h2>
+          <p class="klein" id="tabelle-hinweis"></p>
+
+          <h3>Gewinnlinien: gleiche Symbole von links</h3>
+          <div class="tabellen-halter">
+            <table class="gewinn-tabelle">
+              <thead>
+                <tr>
+                  <th scope="col">Symbol</th>
+                  <th scope="col">2 gleiche</th>
+                  <th scope="col">3 gleiche</th>
+                  <th scope="col">4 gleiche</th>
+                  <th scope="col">5 gleiche</th>
+                </tr>
+              </thead>
+              <tbody id="tabelle-linien"></tbody>
+            </table>
+          </div>
+          <p class="klein">
+            Beträge in Spielgeld, darunter die Quote. Die Pharao-Maske zahlt schon ab 2 gleichen
+            Symbolen.
+          </p>
+
+          <div class="scatter-zeile">
+            <svg viewBox="0 0 64 64" aria-hidden="true"><use href="#sym-tor" /></svg>
+            <p>
+              <strong>Tempeltor (Scatter):</strong> 3 oder mehr irgendwo im Sichtfeld zahlen den
+              doppelten Gesamteinsatz (<span id="scatter-betrag">20</span>) und starten 10
+              Freispiele. In den Freispielen bringen 3 oder mehr Tempeltore noch einmal 10
+              Freispiele.
+            </p>
+          </div>
+
+          <h3>Expansion in den Freispielen: ausgefüllte Walzen</h3>
+          <div class="tabellen-halter">
+            <table class="gewinn-tabelle">
+              <thead>
+                <tr>
+                  <th scope="col">Symbol</th>
+                  <th scope="col">2 Walzen</th>
+                  <th scope="col">3 Walzen</th>
+                  <th scope="col">4 Walzen</th>
+                  <th scope="col">5 Walzen</th>
+                </tr>
+              </thead>
+              <tbody id="tabelle-expansion"></tbody>
+            </table>
+          </div>
+          <p class="klein">
+            Gilt für das Spezialsymbol der Freispiele. Der Betrag ist die Zusatzzahlung auf allen 10
+            Linien, die Quote ein Vielfaches des Gesamteinsatzes.
+          </p>
+        </div>
       </div>
-      <div class="dreh-zeile"><button class="knopf primaer dreh-knopf" id="dreh-knopf" type="button">DREHEN</button></div>
 
-      <div class="tabelle" data-gewinnfeier-bis>
-        <h2>Gewinntabelle</h2>
-        <p class="klein" id="tabelle-hinweis"></p>
+      <p class="steuerung">
+        Steuerung: <kbd>Leertaste</kbd> dreht die Walzen (und setzt gesicherte Freispiele fort),
+        <kbd>1</kbd> bis <kbd>4</kbd> wählen den Einsatz (10 / 25 / 50 / 100). Am Handy einfach die
+        Knöpfe antippen. Die Freispiele laufen von allein ab.
+      </p>
 
-        <h3>Gewinnlinien: gleiche Symbole von links</h3>
-        <div class="tabellen-halter">
-          <table class="gewinn-tabelle">
-            <thead><tr><th scope="col">Symbol</th><th scope="col">2 gleiche</th><th scope="col">3 gleiche</th><th scope="col">4 gleiche</th><th scope="col">5 gleiche</th></tr></thead>
-            <tbody id="tabelle-linien"></tbody>
+      <div class="hinweis hinweis-casino">
+        <strong>Nur Spielgeld</strong> – kein Echtgeld, keine Kaufmöglichkeit.
+      </div>
+
+      <section style="max-width: 420px; margin-top: 36px">
+        <h2 style="font-family: var(--pixel); font-weight: 400; font-size: 0.85rem">
+          Lokale Top 3
+        </h2>
+        <p class="klein">
+          Die höchsten Netto-Gewinne einzelner Runden (Auszahlung minus Einsatz, inklusive aller
+          Freispiele daraus).
+        </p>
+        <div id="topliste"></div>
+        <div class="knopf-reihe">
+          <button class="knopf" id="reset" type="button">Topliste zurücksetzen</button>
+          <button class="knopf" id="konto-reset" type="button">Konto zurücksetzen</button>
+        </div>
+        <p class="klein" id="konto-info"></p>
+      </section>
+
+      <section class="lernbox">
+        <details open>
+          <summary>Anleitung &amp; Regeln</summary>
+          <p>
+            <strong>Ziel:</strong> Bring gleiche Symbole von links nach rechts auf eine der 10
+            Gewinnlinien, sammle Tempeltore und spiel die Freispiele mit dem expandierenden Symbol.
+          </p>
+          <ul>
+            <li>
+              Wähle einen Einsatz (10, 25, 50 oder 100) und drücke DREHEN. Der Einsatz gilt für alle
+              10 Linien zusammen und wird sofort von deinem Konto abgebucht.
+            </li>
+            <li>
+              Die Walzen stoppen von links nach rechts. Gewertet werden die 10 festen Gewinnlinien
+              (Geraden, V-Formen und Zickzack, siehe „Wie funktioniert der Code?“). Auf jeder Linie
+              zählt die Folge gleicher Symbole, die auf Walze 1 beginnt.
+            </li>
+            <li>
+              <strong>Linien-Tabs:</strong> Die farbigen Nummern links (1 bis 5) und rechts (6 bis
+              10) neben den Walzen sind die zehn Gewinnlinien. Fahr mit der Maus über einen Tab oder
+              tipp ihn am Handy an (2 Sekunden, erneutes Tippen blendet aus), dann läuft die Linie
+              in ihrer Farbe über die Walzen. Gewinnt eine Linie, leuchten ihr Tab und ihre Linie
+              auf. Die Tempeltore zählen überall und haben darum keine Linie.
+            </li>
+            <li>
+              3, 4 oder 5 gleiche Symbole zahlen die Quote aus der Gewinntabelle. Ein Linien-Gewinn
+              ist Quote × Einsatz ÷ 10. Beispiel: Vier Horusfalken auf einer Linie zahlen bei
+              Einsatz 50 den Betrag 200 × 50 ÷ 10 = 1.000 aus. Die Pharao-Maske zahlt schon ab 2
+              gleichen.
+            </li>
+            <li>
+              <strong>Tempeltor:</strong> 3 oder mehr Tempeltore irgendwo im Sichtfeld zahlen den
+              doppelten Gesamteinsatz und starten 10 Freispiele.
+            </li>
+            <li>
+              <strong>Spannung:</strong> Liegen nach den ersten Walzen schon 2 Tempeltore, drehen
+              die übrigen Walzen länger und bremsen langsamer, die Tore leuchten golden. Erst das
+              dritte Tor (oder sein Ausbleiben) entscheidet. Fehlt es, meldet das Spiel „So knapp!“.
+              Auch vier gleiche hohe Symbole mit dem fünften direkt daneben bekommen dieses Signal.
+              Das Ergebnis stand da längst fest, mehr dazu unter „Die Psychologie echter Automaten“.
+            </li>
+            <li>
+              <strong>Ton:</strong> Oben rechts schaltest du die Klänge ein und aus. Jeder
+              Linien-Gewinn läuft als Lichtband über die Linie und spielt einen kurzen Jingle, auch
+              wenn er weniger als dein Einsatz beträgt. Das Netto zeigt dir immer ehrlich, was
+              unterm Strich bleibt.
+            </li>
+            <li>
+              <strong>Freispiele:</strong> Zu Beginn wird ein Spezialsymbol gezogen, das Banner
+              zeigt es an. Die Freispiele kosten nichts und laufen mit dem Einsatz des auslösenden
+              Drehs. Liegt das Spezialsymbol in einem Freispiel mindestens zweimal im Sichtfeld,
+              expandiert es nach der normalen Auswertung auf die ganzen Walzen, auf denen es liegt,
+              und zahlt zusätzlich auf allen 10 Linien (Tabelle „Expansion“). Erneut 3 Tempeltore
+              bringen 10 weitere Freispiele.
+            </li>
+            <li>
+              Der Gewinn aus der ganzen Runde (auslösender Dreh plus alle Freispiele) wird am Ende
+              gutgeschrieben. Verlässt du die Seite mitten in den Freispielen, werden sie gesichert
+              und beim nächsten Besuch fortgesetzt.
+            </li>
+            <li>
+              Das Spielgeld teilt sich diese Seite mit den anderen Casino-Spielen. Ist dein Konto
+              unter 10 gerutscht, gibt es neues Startgeld.
+            </li>
+            <li>
+              Eine Runde landet in der Top 3, wenn der Netto-Gewinn mindestens 100 beträgt und unter
+              den drei besten bisher liegt.
+            </li>
+          </ul>
+        </details>
+      </section>
+
+      <section class="lernbox">
+        <details>
+          <summary>Die Psychologie echter Automaten</summary>
+          <p>
+            Echte Spielautomaten sind nicht nur Zufallsgeneratoren, sie sind sorgfältig gebaute
+            Wahrnehmungsmaschinen: Licht, Ton und Tempo sollen dafür sorgen, dass sich ein Dreh
+            bedeutsamer anfühlt, als er mathematisch ist. Dieses Spiel setzt einige dieser Mittel
+            offen ein, damit du sie wiedererkennst, und lässt andere bewusst weg. Der entscheidende
+            Unterschied: Das Ergebnis steht bei uns fest, bevor sich eine Walze dreht, und alle
+            Effekte lesen es nur ab. Sie verändern keinen Stopp.
+          </p>
+          <p><strong>Das tun wir (und so wirkt es):</strong></p>
+          <ul>
+            <li>
+              <strong>Scatter-Spannung (Anticipation):</strong> Sind nach den ersten Walzen 2
+              Tempeltore da, drehen die restlichen länger, die Tore pulsieren, ein Ton steigt. Dein
+              Gehirn deutet das als „fast geschafft“, obwohl die Chance auf das dritte Tor klein
+              bleibt. Diese Spannung gibt es bei etwa jedem 19. Dreh (5,2 %), und sie endet meist
+              ohne Bonus.
+            </li>
+            <li>
+              <strong>Beinahe-Treffer („So knapp!“):</strong> Genau 2 Tempeltore (etwa jeder 14.
+              Dreh, 7,3 %) oder 4 gleiche hohe Symbole mit dem fünften daneben werden betont. Ein
+              Fast-Gewinn fühlt sich ähnlich an wie ein Gewinn, bringt aber nichts. Wir betonen nur,
+              was der Zufall wirklich geliefert hat.
+            </li>
+            <li>
+              <strong>Kleine Gewinne feiern:</strong> Im Grundspiel zahlen 56 % aller Treffer
+              weniger als der Einsatz, trotzdem laufen Licht und Jingle. Der Reiz entsteht, weil
+              „etwas passiert“, obwohl du unterm Strich verlierst. Das ist ein milder Verwandter der
+              „Verluste als Gewinn“ echter Geräte. Wir zeigen darum daneben immer das ehrliche
+              Netto.
+            </li>
+            <li>
+              <strong>Ton:</strong> Surren, Stopp-Ticks, Münzen und Jingles sind das
+              Belohnungssystem eines Automaten. Ohne Ton wirkt dasselbe Spiel deutlich nüchterner,
+              probier es mit dem Ton-Knopf aus.
+            </li>
+            <li>
+              <strong>Der Freispiel-Traum:</strong> Ein Bonus ist im Mittel rund 50 Einsätze wert
+              und macht fast die Hälfte der gesamten Auszahlung aus, kommt aber nur etwa alle 117
+              Drehs. Der seltene große Treffer bleibt im Kopf, die vielen Drehs dazwischen
+              verblassen.
+            </li>
+          </ul>
+          <p><strong>Das tun wir bewusst nicht (echte Geräte schon):</strong></p>
+          <ul>
+            <li>
+              <strong>Manipulierte Beinahe-Treffer:</strong> Echte Automaten lassen Scatter
+              auffällig oft knapp über oder unter dem Fenster stoppen und gewichten ihre Walzen
+              virtuell, sodass das dritte Symbol seltener fällt, als es aussieht. Bei uns ist jeder
+              Stopp gleich wahrscheinlich, 2 Tore ohne drittes sind nur so häufig, wie es die
+              Rechnung vorgibt.
+            </li>
+            <li>
+              <strong>Verschleierte Verluste:</strong> Viele Geräte zeigen Credits statt Geld und
+              nennen nur den Gewinn, nicht das Netto, sodass sich ein Verlustdreh wie ein Treffer
+              anfühlt. Bei uns steht das Netto immer da, auch wenn der Gewinn unter dem Einsatz
+              liegt.
+            </li>
+            <li>
+              <strong>Echtes Geld:</strong> Hier gibt es nur Spielgeld und keine Zahlungsfunktion.
+              An echten Automaten treffen dieselben Mittel auf echte Verluste, und genau das macht
+              sie riskant.
+            </li>
+          </ul>
+        </details>
+      </section>
+
+      <section class="lernbox">
+        <details>
+          <summary>Wie funktioniert der Code?</summary>
+          <p>
+            <strong>Sichtfeld und Walzenbänder.</strong> Jede der fünf Walzen ist ein festes Array
+            mit 30 Feldern, zum Beispiel <code>["bube", "pharao", "zehn", …]</code>. Pro Dreh wird
+            je Walze ein Stopp-Index gewürfelt: <code>Math.floor(Math.random() * 30)</code>. Das
+            Symbol an diesem Index liegt in der mittleren Reihe, die beiden Nachbarn davor und
+            danach oben und unten (das Band ist ein Ring: nach Feld 29 kommt wieder Feld 0). Daraus
+            baut <code>sichtfeldAusStopps()</code> ein Feld <code>feld[walze][reihe]</code> mit 5 ×
+            3 Symbolen. Wie oft ein Symbol im Band steht, bestimmt seine Chance: Die Pharao-Maske
+            steht nur 1× in 30 Feldern, die Zehn 7×. Die Zusammensetzung ist bei allen Walzen gleich
+            (7× Zehn, 7× Bube, 4× Dame, 4× König, 2× Ass, 2× Skarabäus, 2× Falke, 1× Pharao, 1×
+            Tempeltor), nur die Reihenfolge unterscheidet sich.
+          </p>
+
+          <p>
+            <strong>Die 10 Gewinnlinien.</strong> Jede Linie ist eine Liste mit fünf Reihen-Nummern,
+            eine je Walze (0 = oben, 1 = Mitte, 2 = unten). Sie stehen in der Konstante
+            <code>GEWINNLINIEN</code>, zum Beispiel <code>[0, 1, 2, 1, 0]</code> für das „V“. Es
+            gibt drei Geraden (1 bis 3), zwei V-Formen (4 und 5), zwei umgekehrte V (6 und 7) und
+            drei Zickzack-Linien (8 bis 10). Die Bilder hier entstehen direkt aus dieser Konstante,
+            ändert man eine Linie im Code, ändert sich die Grafik mit. Dasselbe gilt für die Tabs
+            neben den Walzen und ihre Linien-Vorschau: <code>linienAnzeigeBauen()</code> in
+            <code>assets/gewinnlinien.js</code> bekommt <code>GEWINNLINIEN</code> übergeben, misst
+            die Felder in Pixeln und zeichnet die Linie als SVG-<code>&lt;polyline&gt;</code> in der
+            festen Farbe der Linie. Beim Gewinn leuchtet derselbe Tab in dieser Farbe auf:
+          </p>
+          <div class="linien-grafik" id="linien-grafik"></div>
+
+          <p>
+            <strong>Linien auswerten.</strong> <code>liniengewinneAuswerten()</code> geht jede Linie
+            durch: Das Symbol auf Walze 1 ist der Kandidat, dann wird nach rechts gezählt, solange
+            dasselbe Symbol folgt. Ab 3 gleichen (die Pharao-Maske ab 2) zahlt die Linie die Quote
+            aus <code>LINIENQUOTEN</code>. Ein Tempeltor bildet nie eine Linie, und ein Paar weiter
+            rechts (etwa Walze 3 bis 5) zählt nicht. Der Einsatz ist der Gesamteinsatz für alle 10
+            Linien, also zahlt eine Linie <code>Quote × Einsatz / 10</code>, mit
+            <code>Math.round</code> auf eine ganze Zahl gerundet. Alle Quoten sind gerade Zahlen:
+            Bei Einsatz 25 sind das 2,5 pro Linie, und eine gerade Quote ergibt dann immer eine
+            ganze Zahl. Die Rundung greift mit den vier festen Einsätzen deshalb nie ein, sie ist
+            nur ein Sicherheitsnetz.
+          </p>
+
+          <p>
+            <strong>Scatter.</strong> <code>scatterAuswerten()</code> zählt alle Tempeltore im
+            Sichtfeld, egal wo sie liegen. Ab 3 gibt es den doppelten Gesamteinsatz und 10
+            Freispiele. Weil kein Linienmuster nötig ist, sagt man „positionsunabhängig“.
+          </p>
+
+          <p>
+            <strong>Freispiele und das expandierende Symbol.</strong> Beim Start der Freispiele
+            zieht <code>zufallsSpezialSymbol()</code> eines der 8 Linien-Symbole, alle gleich
+            wahrscheinlich. Jedes Freispiel hat drei Schritte in fester Reihenfolge:
+          </p>
+          <ol>
+            <li>
+              <strong>Normale Linienauswertung.</strong> Genau wie im Grundspiel, das Spezialsymbol
+              ist dabei ein Symbol wie jedes andere.
+            </li>
+            <li>
+              <strong>Expansion.</strong> <code>expansionAuswerten()</code> zählt, wie oft das
+              Spezialsymbol im Sichtfeld liegt. Bei mindestens 2 Treffern füllt es jede Walze, auf
+              der es vorkommt, komplett aus (die Animation deckt die Walzen von links nach rechts
+              auf).
+            </li>
+            <li>
+              <strong>Zusatzauswertung.</strong> Die ausgefüllten Walzen zahlen positionsunabhängig
+              auf allen 10 Linien. Das geht ohne Linienvergleich, weil jede Linie durch jede Walze
+              läuft: Auf jeder Linie liegt das Symbol auf allen ausgefüllten Walzen. Gezahlt wird
+              nach der Zahl dieser Walzen (<code>EXPANSIONSQUOTEN</code>, als Vielfaches des
+              Gesamteinsatzes). Beispiel: Skarabäus füllt 3 Walzen, Einsatz 50: 60 × 50 = 3.000, das
+              sind 300 je Linie.
+            </li>
+          </ol>
+          <p>
+            Liegt das Symbol zweimal auf derselben Walze, expandiert es, füllt aber nur eine Walze
+            und zahlt nichts. Auch Niedrigsymbole auf nur 2 Walzen expandieren ohne Gewinn. Die
+            Pharao-Maske zahlt als einzige schon bei 2 Walzen.
+          </p>
+
+          <p>
+            <strong>Die Auszahlungsquote (RTP) herleiten.</strong> RTP heißt „Return to Player“: Wie
+            viel vom Einsatz kommt auf lange Sicht zurück? Hier gibt es 30 × 30 × 30 × 30 × 30 =
+            24.300.000 gleich wahrscheinliche Stopp-Kombinationen.
+            <code>rtpExaktBerechnen()</code> geht alle einmal durch (in Node dauert das rund eine
+            Minute) und liefert (die Quoten sind auf eine RTP von 95,0 % abgestimmt, und mit mehr
+            niedrigen Symbolen im Band fällt im Grundspiel öfter ein kleiner Treffer: Die
+            Trefferquote liegt bei 30,4 %, 56 % dieser Treffer zahlen weniger als der Einsatz):
+          </p>
+          <table class="rtp-tabelle">
+            <thead>
+              <tr>
+                <th scope="col">Anteil</th>
+                <th scope="col">exakt</th>
+                <th scope="col">Simulation</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">Linien im Grundspiel</th>
+                <td>50,86 %</td>
+                <td></td>
+              </tr>
+              <tr>
+                <th scope="row">Scatter-Gewinn (2 × Einsatz)</th>
+                <td>1,71 %</td>
+                <td></td>
+              </tr>
+              <tr>
+                <th scope="row">Grundspiel gesamt</th>
+                <td>52,57 %</td>
+                <td>52,58 %</td>
+              </tr>
+              <tr>
+                <th scope="row">Freispiele (inkl. Wiederauslösung)</th>
+                <td>42,51 %</td>
+                <td>42,53 %</td>
+              </tr>
+              <tr class="summe">
+                <th scope="row">RTP gesamt</th>
+                <td>95,08 %</td>
+                <td>95,11 %</td>
+              </tr>
+            </tbody>
           </table>
-        </div>
-        <p class="klein">Beträge in Spielgeld, darunter die Quote. Die Pharao-Maske zahlt schon ab 2 gleichen Symbolen.</p>
-
-        <div class="scatter-zeile">
-          <svg viewBox="0 0 64 64" aria-hidden="true"><use href="#sym-tor"/></svg>
-          <p><strong>Tempeltor (Scatter):</strong> 3 oder mehr irgendwo im Sichtfeld zahlen den doppelten Gesamteinsatz (<span id="scatter-betrag">20</span>) und starten 10 Freispiele. In den Freispielen bringen 3 oder mehr Tempeltore noch einmal 10 Freispiele.</p>
-        </div>
-
-        <h3>Expansion in den Freispielen: ausgefüllte Walzen</h3>
-        <div class="tabellen-halter">
-          <table class="gewinn-tabelle">
-            <thead><tr><th scope="col">Symbol</th><th scope="col">2 Walzen</th><th scope="col">3 Walzen</th><th scope="col">4 Walzen</th><th scope="col">5 Walzen</th></tr></thead>
-            <tbody id="tabelle-expansion"></tbody>
+          <p>
+            Die Freispiel-Zeile folgt aus einer kleinen Rechnung. Ein Tempeltor-Dreh passiert mit
+            der Wahrscheinlichkeit p = 0,856 % (1 von 117 Drehs). Ein Freispiel bringt im Mittel
+            Linien + Scatter + Expansion. Die Expansion hängt vom gezogenen Symbol ab (Durchschnitt
+            über alle 8 Symbole: 4,02 × Gesamteinsatz pro Freispiel):
+          </p>
+          <table class="rtp-tabelle">
+            <thead>
+              <tr>
+                <th scope="col">Spezialsymbol</th>
+                <th scope="col">Zehn / Bube</th>
+                <th scope="col">Dame</th>
+                <th scope="col">König</th>
+                <th scope="col">Ass</th>
+                <th scope="col">Skarabäus</th>
+                <th scope="col">Falke</th>
+                <th scope="col">Pharao</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">Expansion je Freispiel</th>
+                <td>2,37</td>
+                <td>2,76</td>
+                <td>3,51</td>
+                <td>3,86</td>
+                <td>5,18</td>
+                <td>6,30</td>
+                <td>5,76</td>
+              </tr>
+            </tbody>
           </table>
-        </div>
-        <p class="klein">Gilt für das Spezialsymbol der Freispiele. Der Betrag ist die Zusatzzahlung auf allen 10 Linien, die Quote ein Vielfaches des Gesamteinsatzes.</p>
+          <p>
+            Weil in den Freispielen erneut 3 Tempeltore fallen können, kommen pro Auslösung im
+            Schnitt <code>10 / (1 − 10 · p)</code> = 10,94 Freispiele zusammen (eine geometrische
+            Reihe). Der Freispiel-Anteil ist dann
+            <code>p × 10,94 × (Grundspiel-Anteil + Expansion)</code> = 0,00856 × 10,94 × (0,5257 +
+            4,0154) = 42,51 %. Fast die Hälfte der Auszahlung steckt also im Bonus, im Mittel ist
+            ein Bonus rund 50 Einsätze wert. Die Simulation (<code>rundeSimulieren()</code>, 120
+            Millionen Runden inklusive aller Freispiele) bestätigt das: Gesamt 95,11 %, die
+            Einzelläufe mit je 5 Millionen Runden liegen zwischen 93,5 % und 96,0 %. Dass sie
+            streuen, liegt an den seltenen Riesengewinnen der Pharao-Maske: Hohe Quoten mit winziger
+            Chance verlangen sehr viele Runden, bis der Durchschnitt zur Ruhe kommt. Einen einzelnen
+            Abend sagt die RTP ohnehin nicht voraus.
+          </p>
+
+          <p>
+            <strong>Spannung, Beinahe-Treffer und Ton.</strong> Alles Folgende liest nur das fertige
+            Ergebnis. <code>spannungErmitteln(feld)</code> schaut Walze für Walze, ob nach den
+            ersten 2 bis 4 Walzen schon 2 Tempeltore liegen, und gibt die erste Walze zurück, die
+            länger dreht. <code>laufPlanErstellen(anzahlWalzen, spannungAb)</code> plant danach die
+            Stoppzeiten: Jede betroffene Walze wartet 0,8, 1,15 und 1,5 Sekunden länger und bremst
+            in 1,0 statt 0,5 Sekunden aus. Bei „Bewegung reduzieren“ beträgt die Verzögerung
+            höchstens 0,3 Sekunden. <code>fastGewinnErmitteln()</code> erkennt „So knapp!“: genau 2
+            Tempeltore oder 4 gleiche hohe Symbole (Ass, Skarabäus, Falke, Pharao) mit dem fünften
+            Symbol direkt daneben. Den Klang erzeugt <code>assets/klang.js</code> aus Oszillatoren
+            der Web-Audio-API, es gibt keine Audiodatei. Der Lauflicht-Rahmen ums Walzenfenster ist
+            reines CSS (wandernde Farbverläufe), im Leerlauf langsam, beim Drehen schneller, bei
+            einem Gewinn golden.
+          </p>
+
+          <p>
+            <strong>Erst entscheiden, dann animieren.</strong> Das Ergebnis jedes Spielzugs steht
+            fest, bevor sich eine Walze bewegt, und wird sofort in die Runde geschrieben. Die
+            Animation ist nur Show. Gedreht wird ein kurzer „Laufband“-Streifen: oben die
+            Ergebnis-Symbole, darunter Zufalls-Füllsymbole, unten das alte Bild. Er läuft per
+            <code>translateY</code> in Prozent nach unten und bremst am Ende mit
+            <code>easeOutBack</code> (kurzes Überschwingen). Weil seine Länge nicht vom 30er-Band
+            abhängt, stoppen die fünf Walzen gleichmäßig von links nach rechts. Die Gewinnlinien
+            zeichnet ein SVG-Layer über den Walzen: Mit <code>getBoundingClientRect()</code> werden
+            die Feldmitten in Pixeln gemessen und zu einem Linienzug verbunden.
+          </p>
+
+          <p>
+            <strong>Der Weg des Geldes und das Sichern.</strong> Eine „Runde“ ist ein bezahlter Dreh
+            samt allen Freispielen. <code>einsatzAbbuchen()</code> läuft einmal am Anfang,
+            <code>rundeAbschliessen(einsatz, gesamtauszahlung)</code> einmal am Ende, danach
+            <code>walletHudAktualisieren()</code>. Das Konto selbst liegt in
+            <code>wallet.js</code> und wird von allen Casino-Spielen geteilt. Laufende Freispiele
+            (Anzahl, Spezialsymbol, Einsatz, bisheriger Gewinn) stehen im localStorage und werden
+            beim Laden mit <code>freispielStandPruefen()</code> kontrolliert: Gespeicherte Daten
+            kann jeder von Hand ändern, also gilt nur, was in den erlaubten Bereich fällt. Die
+            Topliste füllt sich still, ohne Dialog.
+          </p>
+
+          <p>
+            <strong>Gewinne feiern.</strong> Je größer der Gewinn im Verhältnis zum Einsatz, desto
+            wilder die Animation. Gemessen wird der Faktor <code>Auszahlung ÷ Gesamteinsatz</code>,
+            deshalb skaliert alles mit deinem Einsatz: ab ×5 „Schöner Gewinn“ (Banner), ab ×15
+            „Großer Gewinn“ (Overlay mit Funken), ab ×40 „Mega Gewinn“ (Münzregen und blitzender
+            Rand). Gefeiert wird jeder einzelne Spielzug, am Ende einer Freispiel-Serie zusätzlich
+            der <em>Gesamtgewinn</em> der Serie, aber nur, wenn er eine höhere Stufe erreicht als
+            jeder Einzelzug (sonst würde dieselbe Stufe doppelt gefeiert). Dafür merkt sich
+            <code>game.js</code> die höchste bereits gezeigte Stufe. Die Stufenwahl ist die reine
+            Funktion <code>stufeBestimmen(betrag, einsatz)</code> in
+            <code>assets/gewinnfeier.js</code>, die Münzen entstehen in einer eigenen
+            Mini-Partikel-Engine auf einem <code>&lt;canvas&gt;</code>. Ein Klick oder Tastendruck
+            überspringt die Feier sofort, bei „Bewegung reduzieren“ bleibt nur ein ruhiges Banner.
+            An der Auszahlung ändert die Feier nichts.
+          </p>
+        </details>
+      </section>
+    </main>
+    <footer class="fuss">
+      <div class="container fuss-in">
+        <span>Browser-Arcade · Open Source</span>
+        <nav aria-label="Rechtliches">
+          <a href="./impressum.html">Impressum</a><a href="./datenschutz.html">Datenschutz</a>
+        </nav>
       </div>
-    </div>
-
-    <p class="steuerung">Steuerung: <kbd>Leertaste</kbd> dreht die Walzen (und setzt gesicherte Freispiele fort), <kbd>1</kbd> bis <kbd>4</kbd> wählen den Einsatz (10 / 25 / 50 / 100). Am Handy einfach die Knöpfe antippen. Die Freispiele laufen von allein ab.</p>
-
-    <div class="hinweis hinweis-casino"><strong>Nur Spielgeld</strong> – kein Echtgeld, keine Kaufmöglichkeit.</div>
-
-    <section style="max-width:420px;margin-top:36px"><h2 style="font-family:var(--pixel);font-weight:400;font-size:.85rem">Lokale Top 3</h2>
-      <p class="klein">Die höchsten Netto-Gewinne einzelner Runden (Auszahlung minus Einsatz, inklusive aller Freispiele daraus).</p>
-      <div id="topliste"></div>
-      <div class="knopf-reihe">
-        <button class="knopf" id="reset" type="button">Topliste zurücksetzen</button>
-        <button class="knopf" id="konto-reset" type="button">Konto zurücksetzen</button>
-      </div>
-      <p class="klein" id="konto-info"></p>
-    </section>
-
-    <section class="lernbox"><details open><summary>Anleitung &amp; Regeln</summary>
-      <p><strong>Ziel:</strong> Bring gleiche Symbole von links nach rechts auf eine der 10 Gewinnlinien, sammle Tempeltore und spiel die Freispiele mit dem expandierenden Symbol.</p>
-      <ul>
-        <li>Wähle einen Einsatz (10, 25, 50 oder 100) und drücke DREHEN. Der Einsatz gilt für alle 10 Linien zusammen und wird sofort von deinem Konto abgebucht.</li>
-        <li>Die Walzen stoppen von links nach rechts. Gewertet werden die 10 festen Gewinnlinien (Geraden, V-Formen und Zickzack, siehe „Wie funktioniert der Code?“). Auf jeder Linie zählt die Folge gleicher Symbole, die auf Walze 1 beginnt.</li>
-        <li><strong>Linien-Tabs:</strong> Die farbigen Nummern links (1 bis 5) und rechts (6 bis 10) neben den Walzen sind die zehn Gewinnlinien. Fahr mit der Maus über einen Tab oder tipp ihn am Handy an (2 Sekunden, erneutes Tippen blendet aus), dann läuft die Linie in ihrer Farbe über die Walzen. Gewinnt eine Linie, leuchten ihr Tab und ihre Linie auf. Die Tempeltore zählen überall und haben darum keine Linie.</li>
-        <li>3, 4 oder 5 gleiche Symbole zahlen die Quote aus der Gewinntabelle. Ein Linien-Gewinn ist Quote × Einsatz ÷ 10. Beispiel: Vier Horusfalken auf einer Linie zahlen bei Einsatz 50 den Betrag 200 × 50 ÷ 10 = 1.000 aus. Die Pharao-Maske zahlt schon ab 2 gleichen.</li>
-        <li><strong>Tempeltor:</strong> 3 oder mehr Tempeltore irgendwo im Sichtfeld zahlen den doppelten Gesamteinsatz und starten 10 Freispiele.</li>
-        <li><strong>Spannung:</strong> Liegen nach den ersten Walzen schon 2 Tempeltore, drehen die übrigen Walzen länger und bremsen langsamer, die Tore leuchten golden. Erst das dritte Tor (oder sein Ausbleiben) entscheidet. Fehlt es, meldet das Spiel „So knapp!“. Auch vier gleiche hohe Symbole mit dem fünften direkt daneben bekommen dieses Signal. Das Ergebnis stand da längst fest, mehr dazu unter „Die Psychologie echter Automaten“.</li>
-        <li><strong>Ton:</strong> Oben rechts schaltest du die Klänge ein und aus. Jeder Linien-Gewinn läuft als Lichtband über die Linie und spielt einen kurzen Jingle, auch wenn er weniger als dein Einsatz beträgt. Das Netto zeigt dir immer ehrlich, was unterm Strich bleibt.</li>
-        <li><strong>Freispiele:</strong> Zu Beginn wird ein Spezialsymbol gezogen, das Banner zeigt es an. Die Freispiele kosten nichts und laufen mit dem Einsatz des auslösenden Drehs. Liegt das Spezialsymbol in einem Freispiel mindestens zweimal im Sichtfeld, expandiert es nach der normalen Auswertung auf die ganzen Walzen, auf denen es liegt, und zahlt zusätzlich auf allen 10 Linien (Tabelle „Expansion“). Erneut 3 Tempeltore bringen 10 weitere Freispiele.</li>
-        <li>Der Gewinn aus der ganzen Runde (auslösender Dreh plus alle Freispiele) wird am Ende gutgeschrieben. Verlässt du die Seite mitten in den Freispielen, werden sie gesichert und beim nächsten Besuch fortgesetzt.</li>
-        <li>Das Spielgeld teilt sich diese Seite mit den anderen Casino-Spielen. Ist dein Konto unter 10 gerutscht, gibt es neues Startgeld.</li>
-        <li>Eine Runde landet in der Top 3, wenn der Netto-Gewinn mindestens 100 beträgt und unter den drei besten bisher liegt.</li>
-      </ul>
-    </details></section>
-
-    <section class="lernbox"><details><summary>Die Psychologie echter Automaten</summary>
-      <p>Echte Spielautomaten sind nicht nur Zufallsgeneratoren, sie sind sorgfältig gebaute Wahrnehmungsmaschinen: Licht, Ton und Tempo sollen dafür sorgen, dass sich ein Dreh bedeutsamer anfühlt, als er mathematisch ist. Dieses Spiel setzt einige dieser Mittel offen ein, damit du sie wiedererkennst, und lässt andere bewusst weg. Der entscheidende Unterschied: Das Ergebnis steht bei uns fest, bevor sich eine Walze dreht, und alle Effekte lesen es nur ab. Sie verändern keinen Stopp.</p>
-      <p><strong>Das tun wir (und so wirkt es):</strong></p>
-      <ul>
-        <li><strong>Scatter-Spannung (Anticipation):</strong> Sind nach den ersten Walzen 2 Tempeltore da, drehen die restlichen länger, die Tore pulsieren, ein Ton steigt. Dein Gehirn deutet das als „fast geschafft“, obwohl die Chance auf das dritte Tor klein bleibt. Diese Spannung gibt es bei etwa jedem 19. Dreh (5,2 %), und sie endet meist ohne Bonus.</li>
-        <li><strong>Beinahe-Treffer („So knapp!“):</strong> Genau 2 Tempeltore (etwa jeder 14. Dreh, 7,3 %) oder 4 gleiche hohe Symbole mit dem fünften daneben werden betont. Ein Fast-Gewinn fühlt sich ähnlich an wie ein Gewinn, bringt aber nichts. Wir betonen nur, was der Zufall wirklich geliefert hat.</li>
-        <li><strong>Kleine Gewinne feiern:</strong> Im Grundspiel zahlen 56 % aller Treffer weniger als der Einsatz, trotzdem laufen Licht und Jingle. Der Reiz entsteht, weil „etwas passiert“, obwohl du unterm Strich verlierst. Das ist ein milder Verwandter der „Verluste als Gewinn“ echter Geräte. Wir zeigen darum daneben immer das ehrliche Netto.</li>
-        <li><strong>Ton:</strong> Surren, Stopp-Ticks, Münzen und Jingles sind das Belohnungssystem eines Automaten. Ohne Ton wirkt dasselbe Spiel deutlich nüchterner, probier es mit dem Ton-Knopf aus.</li>
-        <li><strong>Der Freispiel-Traum:</strong> Ein Bonus ist im Mittel rund 50 Einsätze wert und macht fast die Hälfte der gesamten Auszahlung aus, kommt aber nur etwa alle 117 Drehs. Der seltene große Treffer bleibt im Kopf, die vielen Drehs dazwischen verblassen.</li>
-      </ul>
-      <p><strong>Das tun wir bewusst nicht (echte Geräte schon):</strong></p>
-      <ul>
-        <li><strong>Manipulierte Beinahe-Treffer:</strong> Echte Automaten lassen Scatter auffällig oft knapp über oder unter dem Fenster stoppen und gewichten ihre Walzen virtuell, sodass das dritte Symbol seltener fällt, als es aussieht. Bei uns ist jeder Stopp gleich wahrscheinlich, 2 Tore ohne drittes sind nur so häufig, wie es die Rechnung vorgibt.</li>
-        <li><strong>Verschleierte Verluste:</strong> Viele Geräte zeigen Credits statt Geld und nennen nur den Gewinn, nicht das Netto, sodass sich ein Verlustdreh wie ein Treffer anfühlt. Bei uns steht das Netto immer da, auch wenn der Gewinn unter dem Einsatz liegt.</li>
-        <li><strong>Echtes Geld:</strong> Hier gibt es nur Spielgeld und keine Zahlungsfunktion. An echten Automaten treffen dieselben Mittel auf echte Verluste, und genau das macht sie riskant.</li>
-      </ul>
-    </details></section>
-
-    <section class="lernbox"><details><summary>Wie funktioniert der Code?</summary>
-      <p><strong>Sichtfeld und Walzenbänder.</strong> Jede der fünf Walzen ist ein festes Array mit 30 Feldern, zum Beispiel <code>["bube", "pharao", "zehn", …]</code>. Pro Dreh wird je Walze ein Stopp-Index gewürfelt: <code>Math.floor(Math.random() * 30)</code>. Das Symbol an diesem Index liegt in der mittleren Reihe, die beiden Nachbarn davor und danach oben und unten (das Band ist ein Ring: nach Feld 29 kommt wieder Feld 0). Daraus baut <code>sichtfeldAusStopps()</code> ein Feld <code>feld[walze][reihe]</code> mit 5 × 3 Symbolen. Wie oft ein Symbol im Band steht, bestimmt seine Chance: Die Pharao-Maske steht nur 1× in 30 Feldern, die Zehn 7×. Die Zusammensetzung ist bei allen Walzen gleich (7× Zehn, 7× Bube, 4× Dame, 4× König, 2× Ass, 2× Skarabäus, 2× Falke, 1× Pharao, 1× Tempeltor), nur die Reihenfolge unterscheidet sich.</p>
-
-      <p><strong>Die 10 Gewinnlinien.</strong> Jede Linie ist eine Liste mit fünf Reihen-Nummern, eine je Walze (0 = oben, 1 = Mitte, 2 = unten). Sie stehen in der Konstante <code>GEWINNLINIEN</code>, zum Beispiel <code>[0, 1, 2, 1, 0]</code> für das „V“. Es gibt drei Geraden (1 bis 3), zwei V-Formen (4 und 5), zwei umgekehrte V (6 und 7) und drei Zickzack-Linien (8 bis 10). Die Bilder hier entstehen direkt aus dieser Konstante, ändert man eine Linie im Code, ändert sich die Grafik mit. Dasselbe gilt für die Tabs neben den Walzen und ihre Linien-Vorschau: <code>linienAnzeigeBauen()</code> in <code>assets/gewinnlinien.js</code> bekommt <code>GEWINNLINIEN</code> übergeben, misst die Felder in Pixeln und zeichnet die Linie als SVG-<code>&lt;polyline&gt;</code> in der festen Farbe der Linie. Beim Gewinn leuchtet derselbe Tab in dieser Farbe auf:</p>
-      <div class="linien-grafik" id="linien-grafik"></div>
-
-      <p><strong>Linien auswerten.</strong> <code>liniengewinneAuswerten()</code> geht jede Linie durch: Das Symbol auf Walze 1 ist der Kandidat, dann wird nach rechts gezählt, solange dasselbe Symbol folgt. Ab 3 gleichen (die Pharao-Maske ab 2) zahlt die Linie die Quote aus <code>LINIENQUOTEN</code>. Ein Tempeltor bildet nie eine Linie, und ein Paar weiter rechts (etwa Walze 3 bis 5) zählt nicht. Der Einsatz ist der Gesamteinsatz für alle 10 Linien, also zahlt eine Linie <code>Quote × Einsatz / 10</code>, mit <code>Math.round</code> auf eine ganze Zahl gerundet. Alle Quoten sind gerade Zahlen: Bei Einsatz 25 sind das 2,5 pro Linie, und eine gerade Quote ergibt dann immer eine ganze Zahl. Die Rundung greift mit den vier festen Einsätzen deshalb nie ein, sie ist nur ein Sicherheitsnetz.</p>
-
-      <p><strong>Scatter.</strong> <code>scatterAuswerten()</code> zählt alle Tempeltore im Sichtfeld, egal wo sie liegen. Ab 3 gibt es den doppelten Gesamteinsatz und 10 Freispiele. Weil kein Linienmuster nötig ist, sagt man „positionsunabhängig“.</p>
-
-      <p><strong>Freispiele und das expandierende Symbol.</strong> Beim Start der Freispiele zieht <code>zufallsSpezialSymbol()</code> eines der 8 Linien-Symbole, alle gleich wahrscheinlich. Jedes Freispiel hat drei Schritte in fester Reihenfolge:</p>
-      <ol>
-        <li><strong>Normale Linienauswertung.</strong> Genau wie im Grundspiel, das Spezialsymbol ist dabei ein Symbol wie jedes andere.</li>
-        <li><strong>Expansion.</strong> <code>expansionAuswerten()</code> zählt, wie oft das Spezialsymbol im Sichtfeld liegt. Bei mindestens 2 Treffern füllt es jede Walze, auf der es vorkommt, komplett aus (die Animation deckt die Walzen von links nach rechts auf).</li>
-        <li><strong>Zusatzauswertung.</strong> Die ausgefüllten Walzen zahlen positionsunabhängig auf allen 10 Linien. Das geht ohne Linienvergleich, weil jede Linie durch jede Walze läuft: Auf jeder Linie liegt das Symbol auf allen ausgefüllten Walzen. Gezahlt wird nach der Zahl dieser Walzen (<code>EXPANSIONSQUOTEN</code>, als Vielfaches des Gesamteinsatzes). Beispiel: Skarabäus füllt 3 Walzen, Einsatz 50: 60 × 50 = 3.000, das sind 300 je Linie.</li>
-      </ol>
-      <p>Liegt das Symbol zweimal auf derselben Walze, expandiert es, füllt aber nur eine Walze und zahlt nichts. Auch Niedrigsymbole auf nur 2 Walzen expandieren ohne Gewinn. Die Pharao-Maske zahlt als einzige schon bei 2 Walzen.</p>
-
-      <p><strong>Die Auszahlungsquote (RTP) herleiten.</strong> RTP heißt „Return to Player“: Wie viel vom Einsatz kommt auf lange Sicht zurück? Hier gibt es 30 × 30 × 30 × 30 × 30 = 24.300.000 gleich wahrscheinliche Stopp-Kombinationen. <code>rtpExaktBerechnen()</code> geht alle einmal durch (in Node dauert das rund eine Minute) und liefert (die Quoten sind auf eine RTP von 95,0 % abgestimmt, und mit mehr niedrigen Symbolen im Band fällt im Grundspiel öfter ein kleiner Treffer: Die Trefferquote liegt bei 30,4 %, 56 % dieser Treffer zahlen weniger als der Einsatz):</p>
-      <table class="rtp-tabelle">
-        <thead><tr><th scope="col">Anteil</th><th scope="col">exakt</th><th scope="col">Simulation</th></tr></thead>
-        <tbody>
-          <tr><th scope="row">Linien im Grundspiel</th><td>50,86 %</td><td></td></tr>
-          <tr><th scope="row">Scatter-Gewinn (2 × Einsatz)</th><td>1,71 %</td><td></td></tr>
-          <tr><th scope="row">Grundspiel gesamt</th><td>52,57 %</td><td>52,58 %</td></tr>
-          <tr><th scope="row">Freispiele (inkl. Wiederauslösung)</th><td>42,51 %</td><td>42,53 %</td></tr>
-          <tr class="summe"><th scope="row">RTP gesamt</th><td>95,08 %</td><td>95,11 %</td></tr>
-        </tbody>
-      </table>
-      <p>Die Freispiel-Zeile folgt aus einer kleinen Rechnung. Ein Tempeltor-Dreh passiert mit der Wahrscheinlichkeit p = 0,856 % (1 von 117 Drehs). Ein Freispiel bringt im Mittel Linien + Scatter + Expansion. Die Expansion hängt vom gezogenen Symbol ab (Durchschnitt über alle 8 Symbole: 4,02 × Gesamteinsatz pro Freispiel):</p>
-      <table class="rtp-tabelle">
-        <thead><tr><th scope="col">Spezialsymbol</th><th scope="col">Zehn / Bube</th><th scope="col">Dame</th><th scope="col">König</th><th scope="col">Ass</th><th scope="col">Skarabäus</th><th scope="col">Falke</th><th scope="col">Pharao</th></tr></thead>
-        <tbody><tr><th scope="row">Expansion je Freispiel</th><td>2,37</td><td>2,76</td><td>3,51</td><td>3,86</td><td>5,18</td><td>6,30</td><td>5,76</td></tr></tbody>
-      </table>
-      <p>Weil in den Freispielen erneut 3 Tempeltore fallen können, kommen pro Auslösung im Schnitt <code>10 / (1 − 10 · p)</code> = 10,94 Freispiele zusammen (eine geometrische Reihe). Der Freispiel-Anteil ist dann <code>p × 10,94 × (Grundspiel-Anteil + Expansion)</code> = 0,00856 × 10,94 × (0,5257 + 4,0154) = 42,51 %. Fast die Hälfte der Auszahlung steckt also im Bonus, im Mittel ist ein Bonus rund 50 Einsätze wert. Die Simulation (<code>rundeSimulieren()</code>, 120 Millionen Runden inklusive aller Freispiele) bestätigt das: Gesamt 95,11 %, die Einzelläufe mit je 5 Millionen Runden liegen zwischen 93,5 % und 96,0 %. Dass sie streuen, liegt an den seltenen Riesengewinnen der Pharao-Maske: Hohe Quoten mit winziger Chance verlangen sehr viele Runden, bis der Durchschnitt zur Ruhe kommt. Einen einzelnen Abend sagt die RTP ohnehin nicht voraus.</p>
-
-      <p><strong>Spannung, Beinahe-Treffer und Ton.</strong> Alles Folgende liest nur das fertige Ergebnis. <code>spannungErmitteln(feld)</code> schaut Walze für Walze, ob nach den ersten 2 bis 4 Walzen schon 2 Tempeltore liegen, und gibt die erste Walze zurück, die länger dreht. <code>laufPlanErstellen(anzahlWalzen, spannungAb)</code> plant danach die Stoppzeiten: Jede betroffene Walze wartet 0,8, 1,15 und 1,5 Sekunden länger und bremst in 1,0 statt 0,5 Sekunden aus. Bei „Bewegung reduzieren“ beträgt die Verzögerung höchstens 0,3 Sekunden. <code>fastGewinnErmitteln()</code> erkennt „So knapp!“: genau 2 Tempeltore oder 4 gleiche hohe Symbole (Ass, Skarabäus, Falke, Pharao) mit dem fünften Symbol direkt daneben. Den Klang erzeugt <code>assets/klang.js</code> aus Oszillatoren der Web-Audio-API, es gibt keine Audiodatei. Der Lauflicht-Rahmen ums Walzenfenster ist reines CSS (wandernde Farbverläufe), im Leerlauf langsam, beim Drehen schneller, bei einem Gewinn golden.</p>
-
-      <p><strong>Erst entscheiden, dann animieren.</strong> Das Ergebnis jedes Spielzugs steht fest, bevor sich eine Walze bewegt, und wird sofort in die Runde geschrieben. Die Animation ist nur Show. Gedreht wird ein kurzer „Laufband“-Streifen: oben die Ergebnis-Symbole, darunter Zufalls-Füllsymbole, unten das alte Bild. Er läuft per <code>translateY</code> in Prozent nach unten und bremst am Ende mit <code>easeOutBack</code> (kurzes Überschwingen). Weil seine Länge nicht vom 30er-Band abhängt, stoppen die fünf Walzen gleichmäßig von links nach rechts. Die Gewinnlinien zeichnet ein SVG-Layer über den Walzen: Mit <code>getBoundingClientRect()</code> werden die Feldmitten in Pixeln gemessen und zu einem Linienzug verbunden.</p>
-
-      <p><strong>Der Weg des Geldes und das Sichern.</strong> Eine „Runde“ ist ein bezahlter Dreh samt allen Freispielen. <code>einsatzAbbuchen()</code> läuft einmal am Anfang, <code>rundeAbschliessen(einsatz, gesamtauszahlung)</code> einmal am Ende, danach <code>walletHudAktualisieren()</code>. Das Konto selbst liegt in <code>wallet.js</code> und wird von allen Casino-Spielen geteilt. Laufende Freispiele (Anzahl, Spezialsymbol, Einsatz, bisheriger Gewinn) stehen im localStorage und werden beim Laden mit <code>freispielStandPruefen()</code> kontrolliert: Gespeicherte Daten kann jeder von Hand ändern, also gilt nur, was in den erlaubten Bereich fällt. Die Topliste füllt sich still, ohne Dialog.</p>
-
-      <p><strong>Gewinne feiern.</strong> Je größer der Gewinn im Verhältnis zum Einsatz, desto wilder die Animation. Gemessen wird der Faktor <code>Auszahlung ÷ Gesamteinsatz</code>, deshalb skaliert alles mit deinem Einsatz: ab ×5 „Schöner Gewinn“ (Banner), ab ×15 „Großer Gewinn“ (Overlay mit Funken), ab ×40 „Mega Gewinn“ (Münzregen und blitzender Rand). Gefeiert wird jeder einzelne Spielzug, am Ende einer Freispiel-Serie zusätzlich der <em>Gesamtgewinn</em> der Serie, aber nur, wenn er eine höhere Stufe erreicht als jeder Einzelzug (sonst würde dieselbe Stufe doppelt gefeiert). Dafür merkt sich <code>game.js</code> die höchste bereits gezeigte Stufe. Die Stufenwahl ist die reine Funktion <code>stufeBestimmen(betrag, einsatz)</code> in <code>assets/gewinnfeier.js</code>, die Münzen entstehen in einer eigenen Mini-Partikel-Engine auf einem <code>&lt;canvas&gt;</code>. Ein Klick oder Tastendruck überspringt die Feier sofort, bei „Bewegung reduzieren“ bleibt nur ein ruhiges Banner. An der Auszahlung ändert die Feier nichts.</p>
-    </details></section>
-  </main>
-  <footer class="fuss"><div class="container fuss-in"><span>Browser-Arcade · Open Source</span><nav aria-label="Rechtliches"><a href="./impressum.html">Impressum</a><a href="./datenschutz.html">Datenschutz</a></nav></div></footer>
-  <script type="module" src="./game.js"></script>
-</body>
+    </footer>
+    <script type="module" src="./game.js"></script>
+  </body>
 </html>

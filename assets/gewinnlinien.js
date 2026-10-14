@@ -27,16 +27,16 @@ const SVG_NS = "http://www.w3.org/2000/svg";
  * Die Zahl auf dem Tab bleibt das eigentliche Erkennungszeichen (Farbe allein trägt nichts).
  */
 export const LINIEN_FARBEN = [
-  "#ff4545",   //  1 Rot
-  "#a6ff1a",   //  2 Limette
-  "#3d7bff",   //  3 Blau
-  "#ff4f98",   //  4 Pink
-  "#ffd23f",   //  5 Gelb
-  "#19e3ff",   //  6 Cyan
-  "#e85cff",   //  7 Magenta
-  "#ff8a1f",   //  8 Orange
-  "#25e88a",   //  9 Grün
-  "#b88cff",   // 10 Violett
+  "#ff4545", //  1 Rot
+  "#a6ff1a", //  2 Limette
+  "#3d7bff", //  3 Blau
+  "#ff4f98", //  4 Pink
+  "#ffd23f", //  5 Gelb
+  "#19e3ff", //  6 Cyan
+  "#e85cff", //  7 Magenta
+  "#ff8a1f", //  8 Orange
+  "#25e88a", //  9 Grün
+  "#b88cff", // 10 Violett
 ];
 
 /** So lange bleibt die Vorschau nach einem Tippen (Touch) sichtbar. */
@@ -85,7 +85,14 @@ function svgElement(name, klasse) {
  *   markieren(nr)                   Tab bleibt dezent als "gewonnen" markiert (nach dem Aufleuchten)
  *   zuruecksetzen()                 alle Gewinn-Markierungen weg (vor dem nächsten Dreh)
  */
-export function linienAnzeigeBauen({ linien, namen = [], rahmen, tabsLinks, tabsRechts, reihenAnzahl = 3 }) {
+export function linienAnzeigeBauen({
+  linien,
+  namen = [],
+  rahmen,
+  tabsLinks,
+  tabsRechts,
+  reihenAnzahl = 3,
+}) {
   const walzen = [...rahmen.querySelectorAll(":scope > .walze")];
   const tabs = [];
 
@@ -100,7 +107,10 @@ export function linienAnzeigeBauen({ linien, namen = [], rahmen, tabsLinks, tabs
   function feldMitte(walze, reihe) {
     const r0 = rahmen.getBoundingClientRect();
     const r = walzen[walze].getBoundingClientRect();
-    return { x: r.left - r0.left + r.width / 2, y: r.top - r0.top + ((reihe + 0.5) * r.height) / reihenAnzahl };
+    return {
+      x: r.left - r0.left + r.width / 2,
+      y: r.top - r0.top + ((reihe + 0.5) * r.height) / reihenAnzahl,
+    };
   }
 
   /**
@@ -118,7 +128,10 @@ export function linienAnzeigeBauen({ linien, namen = [], rahmen, tabsLinks, tabs
     // dunkler Rand unter der Linie: hält sie auch über hellen Symbolen lesbar
     const rand = svgElement("polyline", "vorschau-rand");
     rand.setAttribute("points", text);
-    const linie = svgElement("polyline", animiert && !bewegungReduziert() ? "vorschau-linie zeichnet" : "vorschau-linie");
+    const linie = svgElement(
+      "polyline",
+      animiert && !bewegungReduziert() ? "vorschau-linie zeichnet" : "vorschau-linie",
+    );
     linie.setAttribute("points", text);
     linie.setAttribute("pathLength", "1");
     vorschau.replaceChildren(rand, linie);
@@ -134,10 +147,11 @@ export function linienAnzeigeBauen({ linien, namen = [], rahmen, tabsLinks, tabs
 
   // ---------- Zustand der Vorschau: höchstens eine Linie gleichzeitig ----------
   // quelle: "hover" (Maus), "tipp" (Touch, 2 s) oder "fokus" (Tastatur)
-  let aktiv = null;   // { nr, quelle, timer } oder null
+  let aktiv = null; // { nr, quelle, timer } oder null
 
   function verbergen(nr = null, quelle = null) {
-    if (!aktiv || (nr !== null && aktiv.nr !== nr) || (quelle !== null && aktiv.quelle !== quelle)) return;
+    if (!aktiv || (nr !== null && aktiv.nr !== nr) || (quelle !== null && aktiv.quelle !== quelle))
+      return;
     clearTimeout(aktiv.timer);
     tabs[aktiv.nr].setAttribute("aria-pressed", "false");
     vorschau.replaceChildren();
@@ -154,7 +168,9 @@ export function linienAnzeigeBauen({ linien, namen = [], rahmen, tabsLinks, tabs
   }
 
   // Ändert sich die Fenstergröße (Handy drehen, Adressleiste ein-/ausblenden), solange eine Vorschau steht: neu messen.
-  window.addEventListener("resize", () => { if (aktiv) vorschauZeichnen(aktiv.nr, false); });
+  window.addEventListener("resize", () => {
+    if (aktiv) vorschauZeichnen(aktiv.nr, false);
+  });
 
   // ---------- Tabs ----------
   function tabBauen(nr, seite) {
@@ -164,16 +180,27 @@ export function linienAnzeigeBauen({ linien, namen = [], rahmen, tabsLinks, tabs
     tab.textContent = String(nr + 1);
     tab.dataset.linie = String(nr + 1);
     tab.style.setProperty("--lc", linienFarbe(nr));
-    tab.setAttribute("aria-label", `Gewinnlinie ${nr + 1}${namen[nr] ? `, ${namen[nr]}` : ""}: Verlauf anzeigen`);
+    tab.setAttribute(
+      "aria-label",
+      `Gewinnlinie ${nr + 1}${namen[nr] ? `, ${namen[nr]}` : ""}: Verlauf anzeigen`,
+    );
     tab.setAttribute("aria-pressed", "false");
 
     // Welche Eingabe war es? Maus zeigt per Hover, Finger und Stift per Tippen (Hover gibt es dort nicht).
     let eingabe = "mouse";
-    tab.addEventListener("pointerdown", (e) => { eingabe = e.pointerType; });
-    tab.addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse") zeigen(nr, "hover"); });
-    tab.addEventListener("pointerleave", (e) => { if (e.pointerType === "mouse") verbergen(nr, "hover"); });
+    tab.addEventListener("pointerdown", (e) => {
+      eingabe = e.pointerType;
+    });
+    tab.addEventListener("pointerenter", (e) => {
+      if (e.pointerType === "mouse") zeigen(nr, "hover");
+    });
+    tab.addEventListener("pointerleave", (e) => {
+      if (e.pointerType === "mouse") verbergen(nr, "hover");
+    });
     // Tastatur: Solange der Tab den sichtbaren Fokus hat, steht die Vorschau (ein Mausklick löst das nicht aus).
-    tab.addEventListener("focus", () => { if (tab.matches(":focus-visible")) zeigen(nr, "fokus"); });
+    tab.addEventListener("focus", () => {
+      if (tab.matches(":focus-visible")) zeigen(nr, "fokus");
+    });
     tab.addEventListener("blur", () => verbergen(nr, "fokus"));
     tab.addEventListener("click", (e) => {
       if (eingabe !== "mouse" && e.detail > 0) {

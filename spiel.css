@@ -1,0 +1,297 @@
+/* ============================================================
+   Tempelschatz · spielspezifische Styles
+   ------------------------------------------------------------
+   Das gemeinsame Design (HUD, Chips, Dialog, Gewinn-Anzeige …)
+   steckt in ../assets/style.css. Hier liegt nur, was dieses Spiel
+   braucht: das 5x3-Walzenfenster, die Gewinnlinien-Ebene, das
+   Freispiel-Banner, die Gewinntabellen und die Linien-Grafiken.
+   ============================================================ */
+
+/* Das Wallet-HUD wird von wallet.js in #wallet-hud gebaut. display:contents
+   heißt: Dieser Wrapper erzeugt selbst keine Box, seine Kinder (die drei
+   .hud-feld) verhalten sich so, als lägen sie direkt in der .hud-Flexbox. */
+#wallet-hud{display:contents}
+.hud-feld .wert.plus{color:var(--lime)}
+.hud-feld .wert.minus{color:var(--pink)}
+
+
+/* ---------- Bühne: dezente Farbverschiebung in den Freispielen ---- */
+/* Die Klasse .freispiel setzt game.js nur während der Freispiele. Das Gold der
+   Grundspiel-Bühne verschiebt sich dann leicht Richtung Violett/Türkis. */
+.buehne{transition:border-color .6s ease,box-shadow .6s ease}
+.buehne.freispiel{
+  background:linear-gradient(180deg,color-mix(in srgb,var(--violet) 15%,var(--panel)),color-mix(in srgb,#0b5560 26%,var(--panel)));
+  border-color:color-mix(in srgb,var(--violet) 50%,var(--line));
+  box-shadow:inset 0 0 40px #00000055,0 0 44px color-mix(in srgb,var(--violet) 24%,transparent);
+}
+
+
+/* ---------- Freispiel-Banner ------------------------------------- */
+.freispiel-banner{
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px 18px;
+  max-width:620px;margin:0 auto 14px;padding:10px 16px;border-radius:14px;
+  background:color-mix(in srgb,var(--violet) 14%,var(--panel2));
+  border:1px solid color-mix(in srgb,var(--violet) 55%,var(--line));
+}
+/* Das hidden-Attribut würde sonst vom display:flex oben überstimmt */
+.freispiel-banner[hidden]{display:none}
+.banner-symbol{width:48px;height:48px;flex:none}
+.banner-symbol svg{width:100%;height:100%;display:block;filter:drop-shadow(0 2px 4px #000a)}
+.banner-text{display:flex;flex-direction:column;line-height:1.35}
+.banner-text strong{font-family:var(--pixel);font-weight:400;font-size:.8rem;color:var(--violet)}
+.banner-text span{font-size:.9rem;color:var(--mut)}
+.banner-text b{color:var(--txt)}
+.banner-zahlen{display:flex;gap:14px;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+.banner-zahlen b{display:block;font:600 1.05rem var(--mono);letter-spacing:0;text-transform:none;color:var(--txt)}
+
+
+/* ---------- Walzenfenster ---------------------------------------- */
+/* Fünf gleich breite Spalten (Grid). Jede Walze ist dreimal so hoch wie breit
+   (aspect-ratio 1/3) = genau drei quadratische Felder übereinander. */
+/* Tabs der Gewinnlinien (assets/gewinnlinien.css): Fensterbreite und Abstand Rand bis Walzen (Rahmen 2 + Polster 10, mobil 6) */
+.fenster-zeile{--fenster-max:620px}
+@media (max-width:480px){.fenster-zeile{--fv:8px}}
+.walzenfenster{
+  position:relative;                           /* Bezugsrahmen für das Lauflicht (::before) */
+  max-width:620px;margin:4px auto 0;padding:10px;
+  border-radius:18px;
+  background:linear-gradient(180deg,#1d1d3f,#0e0e22);
+  border:2px solid color-mix(in srgb,var(--gold) 55%,var(--line));
+  box-shadow:inset 0 0 0 4px #0a0a18,0 0 26px color-mix(in srgb,var(--gold) 22%,transparent);
+  transition:border-color .6s ease,box-shadow .6s ease;
+}
+.buehne.freispiel .walzenfenster{
+  border-color:color-mix(in srgb,var(--violet) 65%,var(--line));
+  box-shadow:inset 0 0 0 4px #0a0a18,0 0 30px color-mix(in srgb,var(--violet) 34%,transparent);
+}
+/* .walzen ist der Bezugsrahmen für die Gewinnlinien-Ebene (position:relative) */
+.walzen{position:relative;display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+
+.walze{
+  position:relative;overflow:hidden;           /* alles außerhalb der 3 Felder abschneiden */
+  align-self:start;aspect-ratio:1/3;
+  border-radius:10px;
+  background:linear-gradient(90deg,#0b0b1d,#17173a 50%,#0b0b1d);
+  box-shadow:inset 0 0 0 1px #ffffff10;
+  transition:box-shadow var(--schnell);
+}
+/* Walzenrundung: oben und unten dunkel, damit es wie eine Trommel wirkt.
+   Als letztes Kind liegt dieser Schleier über Band, Laufband und Expansion. */
+.walze::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(#000d,transparent 30%,transparent 70%,#000d);
+}
+/* Während die Walze läuft, leuchtet sie leicht in der Akzentfarbe */
+.walze.laeuft{box-shadow:inset 0 0 0 1px #ffffff10,inset 0 0 22px color-mix(in srgb,var(--gold) 22%,transparent)}
+/* Eine ausgefüllte Expansions-Walze bekommt einen goldenen Rahmen */
+.walze.expandiert{box-shadow:inset 0 0 0 2px var(--gold),0 0 18px color-mix(in srgb,var(--gold) 45%,transparent)}
+
+/* Das feste Band (dreimal das Walzenband untereinander) und das Laufband (der kurze
+   Zufalls-Streifen für die Animation). Die Position setzt game.js per transform in
+   Prozent der eigenen Höhe. will-change:transform sagt dem Browser, dass sich das
+   Element dauernd bewegt → eigene Grafikebene, flüssigere Animation. */
+.band,.laufband{position:absolute;left:0;right:0;top:0;will-change:transform}
+.laufband{display:none}
+.walze.laeuft .band{display:none}
+.walze.laeuft .laufband{display:block}
+
+/* Ein Feld ist immer quadratisch (Breite = Walzenbreite) */
+.zelle{aspect-ratio:1;display:grid;place-items:center;border-radius:10px}
+.zelle svg{width:82%;height:82%;display:block;filter:drop-shadow(0 2px 3px #0009)}
+
+/* Expansions-Ebene: füllt die Walze mit drei Spezialsymbolen. Erst sichtbar, wenn
+   game.js die Klasse .aktiv setzt; die Animation "aufdecken" öffnet sie von der Mitte aus. */
+.expansion{
+  position:absolute;inset:0;display:none;grid-template-rows:repeat(3,1fr);
+  background:radial-gradient(circle at 50% 50%,#3b2d0f,#171025 75%);
+}
+.expansion.aktiv{display:grid;animation:aufdecken .45s cubic-bezier(.2,.8,.2,1) both}
+.expansion .zelle svg{width:88%;height:88%}
+@keyframes aufdecken{
+  from{clip-path:inset(50% 0 50% 0);filter:brightness(2.4)}
+  to{clip-path:inset(0 0 0 0);filter:none}
+}
+
+/* ---------- Gewinndarstellung ------------------------------------ */
+/* Ebene für die leuchtenden Gewinnlinien. viewBox und Linienzug setzt game.js in Pixeln. */
+.linien-ebene{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3;overflow:visible}
+/* Farbe der Linie: game.js setzt --lc (feste Farbe je Linie, dieselbe wie beim Tab); ohne Angabe Gold */
+.gewinn-linie{
+  fill:none;stroke:var(--lc,var(--gold));stroke-width:5;stroke-linecap:round;stroke-linejoin:round;
+  filter:drop-shadow(0 0 6px var(--lc,var(--gold)));opacity:.92;
+}
+/* Gewinnfelder pulsieren (scale ist eine eigene Eigenschaft und kollidiert nicht mit transform) */
+@keyframes symbol-puls{from{scale:1;filter:brightness(1) drop-shadow(0 2px 3px #0009)}to{scale:1.18;filter:brightness(1.4) drop-shadow(0 0 8px var(--gold))}}
+.zelle.gewinn-blinken svg{animation:symbol-puls .42s ease-in-out 6 alternate}
+/* Nach der Linienabfolge bleiben die Gewinnfelder dezent umrandet */
+.zelle.gewinn-dauer{
+  box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--gold) 75%,transparent);
+  background:color-mix(in srgb,var(--gold) 12%,transparent);
+}
+/* Tempeltore leuchten türkis auf */
+.zelle.scatter-treffer{
+  box-shadow:inset 0 0 0 2px var(--cyan),0 0 14px color-mix(in srgb,var(--cyan) 55%,transparent);
+  background:color-mix(in srgb,var(--cyan) 14%,transparent);
+}
+.zelle.scatter-treffer svg{animation:symbol-puls .5s ease-in-out 4 alternate}
+
+
+/* Lichtlauf: Beim Liniengewinn läuft ein helles Lichtpaket die Gewinnlinie entlang. game.js legt dafür
+   neben die Linie einen <path pathLength="1">. Das Strich-Muster "kurz an, lang aus" (zwei Pakete je Durchlauf)
+   wird per stroke-dashoffset von 0 auf -0,5 geschoben: genau eine Musterlänge, darum endlos nahtlos. */
+.gewinn-licht{
+  fill:none;stroke:#fffbe0;stroke-width:6;stroke-linecap:round;stroke-linejoin:round;
+  stroke-dasharray:.08 .42;filter:drop-shadow(0 0 8px #fff3b0);
+  animation:lichtlauf .55s linear infinite;
+}
+@keyframes lichtlauf{from{stroke-dashoffset:0}to{stroke-dashoffset:-.5}}
+
+
+/* ---------- Lauflicht-Rahmen ums Walzenfenster ---------------------
+   Wie die Glühlampen-Kette eines echten Automaten: Lämpchen laufen im Uhrzeigersinn um das Fenster.
+   Technik: Ein ::before-Element liegt im Polster des Fensters (dort, wo keine Walze ist) und
+   besteht aus vier Streifen (oben, unten, links, rechts). Jeder Streifen ist ein Hintergrund-Bild
+   aus "Lampe an, Lücke" (repeat-x bzw. repeat-y), dessen background-position um genau eine
+   Musterlänge (--lp) wandert. Dadurch läuft es endlos, ohne dass JavaScript etwas tun muss.
+   Drei Zustände (Klassen setzt game.js am .walzenfenster):
+     (ohne)     Leerlauf   langsam, gedämpftes Gold
+     .dreht     Walzen laufen   schneller, helles Gold
+     .spannung  Scatter-Spannung   sehr schnell, fast weiß
+     .gewinn    Gewinn    golden und hell mit Schein
+   Bei "Bewegung reduzieren" steht der Rahmen still (siehe Ende dieses Blocks). */
+.walzenfenster{--lf:#ffd86b;--lampe:color-mix(in srgb,var(--lf) 42%,transparent);--lauf-dauer:2.8s;--lw:4px;--lp:18px}
+.buehne.freispiel .walzenfenster{--lf:#c9a7ff}
+.walzenfenster::before{
+  content:"";position:absolute;inset:3px;border-radius:14px;pointer-events:none;
+  background:
+    linear-gradient(90deg,var(--lampe) 0 calc(var(--lp) * .4),transparent calc(var(--lp) * .4)) 0 0 / var(--lp) var(--lw) repeat-x,
+    linear-gradient(90deg,var(--lampe) 0 calc(var(--lp) * .4),transparent calc(var(--lp) * .4)) 0 100% / var(--lp) var(--lw) repeat-x,
+    linear-gradient(180deg,var(--lampe) 0 calc(var(--lp) * .4),transparent calc(var(--lp) * .4)) 0 0 / var(--lw) var(--lp) repeat-y,
+    linear-gradient(180deg,var(--lampe) 0 calc(var(--lp) * .4),transparent calc(var(--lp) * .4)) 100% 0 / var(--lw) var(--lp) repeat-y;
+  animation:lauflicht var(--lauf-dauer) linear infinite;
+}
+/* oben nach rechts, rechts nach unten, unten nach links, links nach oben = im Uhrzeigersinn */
+@keyframes lauflicht{
+  from{background-position:0 0,0 100%,0 0,100% 0}
+  to{background-position:var(--lp) 0,calc(var(--lp) * -1) 100%,0 calc(var(--lp) * -1),100% var(--lp)}
+}
+.walzenfenster.dreht{--lampe:color-mix(in srgb,var(--lf) 92%,transparent);--lauf-dauer:.4s}
+.walzenfenster.spannung{--lampe:#fff6d0;--lauf-dauer:.22s}
+.walzenfenster.gewinn{--lampe:#fff1b0;--lauf-dauer:.7s}
+.walzenfenster.gewinn::before{filter:drop-shadow(0 0 4px var(--gold))}
+@media (max-width:480px){
+  .walzenfenster{--lw:3px;--lp:14px}
+  .walzenfenster::before{inset:1.5px;border-radius:12px}
+}
+
+
+/* ---------- Scatter-Spannung und "So knapp!" ---------------------- */
+/* Die Bühne bekommt einen dezenten goldenen Spannungs-Glow, solange die letzten Walzen länger drehen. */
+@keyframes spannung-glow{
+  from{box-shadow:inset 0 0 40px #00000055,0 0 20px color-mix(in srgb,var(--gold) 14%,transparent)}
+  to{box-shadow:inset 0 0 40px #00000055,0 0 40px 4px color-mix(in srgb,var(--gold) 38%,transparent)}
+}
+.buehne.spannung{animation:spannung-glow .7s ease-in-out infinite alternate}
+/* Walzen, die jetzt länger drehen, schimmern golden (das Tor kann noch fallen) */
+@keyframes walze-spannung{
+  from{box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--gold) 55%,transparent),inset 0 0 18px color-mix(in srgb,var(--gold) 16%,transparent)}
+  to{box-shadow:inset 0 0 0 2px var(--gold),inset 0 0 30px color-mix(in srgb,var(--gold) 42%,transparent)}
+}
+.walze.spannung-walze{animation:walze-spannung .4s ease-in-out infinite alternate}
+/* Die schon liegenden Tempeltore pulsieren golden */
+@keyframes scatter-gold{
+  from{scale:1;filter:brightness(1) drop-shadow(0 0 2px var(--gold))}
+  to{scale:1.2;filter:brightness(1.5) drop-shadow(0 0 12px var(--gold))}
+}
+.zelle.scatter-spannung{
+  box-shadow:inset 0 0 0 2px var(--gold),0 0 14px color-mix(in srgb,var(--gold) 55%,transparent);
+  background:color-mix(in srgb,var(--gold) 14%,transparent);
+}
+.zelle.scatter-spannung svg{animation:scatter-gold .4s ease-in-out infinite alternate}
+/* "So knapp!": die beteiligten Felder wackeln (rotate ist eine eigene Eigenschaft und kollidiert nicht mit scale/transform) */
+@keyframes knapp-wackeln{0%,100%{rotate:0deg}15%{rotate:-12deg}35%{rotate:10deg}55%{rotate:-8deg}75%{rotate:5deg}}
+.zelle.knapp{
+  box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--gold) 70%,transparent);
+  background:color-mix(in srgb,var(--gold) 10%,transparent);
+}
+.zelle.knapp svg{animation:knapp-wackeln .6s ease-in-out 2}
+
+/* Bewegung reduzieren: Lauflicht steht still, kein Lichtlauf, kein Pulsieren (die Markierungen per Rahmen bleiben) */
+@media (prefers-reduced-motion:reduce){
+  .walzenfenster::before{animation:none}
+  .gewinn-licht{display:none}
+  .buehne.spannung,.walze.spannung-walze,.zelle.scatter-spannung svg,.zelle.knapp svg{animation:none}
+}
+
+
+/* ---------- Anzeigen und Steuerung unter dem Fenster ---------- */
+.gewinn-anzeige{margin:18px 0 0}
+.dreh-info{margin:4px 0 0;min-height:3.2em;text-align:center;font-weight:600}
+.einsatz-zeile{display:flex;flex-direction:column;align-items:center;margin-top:10px}
+.einsatz-label{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
+.einsatz-zeile .chips{justify-content:center;margin:8px 0 4px}
+.einsatz-zeile .klein{margin:0;text-align:center}
+.dreh-zeile{display:flex;justify-content:center;margin-top:12px}
+.dreh-knopf{width:min(100%,360px);min-height:58px;font-family:var(--pixel);font-weight:400;font-size:.95rem}
+
+.klein{margin:6px 0 0;font-size:.85rem;color:var(--mut)}
+.knopf-reihe{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.hinweis-casino{margin-top:20px}
+
+
+/* ---------- Gewinntabellen --------------------------------------- */
+.tabelle{margin-top:26px;padding-top:18px;border-top:1px solid var(--line)}
+.tabelle h2{margin:0;font-family:var(--pixel);font-weight:400;font-size:.8rem}
+.tabelle h3{margin:22px 0 4px;font-size:.95rem;color:var(--txt)}
+/* auf schmalen Handys darf die Tabelle seitlich scrollen, statt die Seite zu sprengen */
+.tabellen-halter{overflow-x:auto}
+.gewinn-tabelle{width:100%;min-width:300px;border-collapse:collapse;margin:8px 0 4px;font-size:.88rem}
+.gewinn-tabelle th,.gewinn-tabelle td{padding:6px 8px;border-bottom:1px solid var(--line)}
+.gewinn-tabelle thead th{font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);text-align:right;font-weight:600}
+.gewinn-tabelle thead th:first-child{text-align:left}
+.gewinn-tabelle tbody th{text-align:left;font-weight:600;color:var(--txt)}
+.gewinn-tabelle td{text-align:right;font-family:var(--mono);color:var(--txt);line-height:1.25}
+.gewinn-tabelle td.leer{color:var(--mut)}
+.gewinn-tabelle .betrag{display:block}
+.gewinn-tabelle .quote{display:block;font-size:.7rem;color:var(--mut)}
+.symbol-name{display:flex;align-items:center;gap:8px;white-space:nowrap}
+.symbol-name svg{width:30px;height:30px;display:block;flex:none}
+/* Treffer des letzten Zugs: Zeile und genaue Zelle hervorheben */
+.gewinn-tabelle tr.treffer th{color:var(--gold)}
+.gewinn-tabelle td.treffer{color:var(--gold);background:color-mix(in srgb,var(--gold) 14%,transparent)}
+
+.scatter-zeile{display:flex;align-items:center;gap:12px;margin-top:16px;padding:8px 14px;border-radius:12px;background:var(--panel2);border:1px solid var(--line)}
+.scatter-zeile svg{width:40px;height:40px;flex:none}
+.scatter-zeile p{margin:0;font-size:.9rem;color:var(--mut)}
+.scatter-zeile strong{color:var(--txt)}
+
+
+/* ---------- Lernbox: Linien-Grafiken und Tabellen --------------- */
+.linien-grafik{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:12px;margin:14px 0}
+.linien-grafik figure{margin:0;padding:8px;border-radius:10px;background:var(--panel2);border:1px solid var(--line)}
+.linien-grafik svg{display:block;width:100%;height:auto}
+.linien-grafik .feld{fill:var(--panel);stroke:var(--line);stroke-width:.6}
+.linien-grafik .feld.an{fill:color-mix(in srgb,var(--lc,var(--gold)) 38%,var(--panel));stroke:var(--lc,var(--gold))}
+.linien-grafik .linie{fill:none;stroke:var(--lc,var(--gold));stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.linien-grafik figcaption{margin-top:6px;font-size:.78rem;color:var(--mut);text-align:center}
+
+.rtp-tabelle{width:100%;border-collapse:collapse;margin:8px 0 14px;font-size:.88rem;color:var(--mut)}
+.rtp-tabelle th,.rtp-tabelle td{padding:6px 8px;text-align:left;border-bottom:1px solid var(--line)}
+.rtp-tabelle thead th{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase}
+.rtp-tabelle tbody th{font-weight:600;color:var(--txt)}
+.rtp-tabelle td{font-family:var(--mono)}
+.rtp-tabelle .summe th,.rtp-tabelle .summe td{color:var(--gold);border-bottom:0}
+.lernbox details{overflow-x:auto}
+
+@media (max-width:480px){
+  .buehne{padding:10px}
+  .walzenfenster{padding:6px;border-radius:14px}
+  .walzen{gap:4px}
+  .freispiel-banner{padding:8px 10px}
+  /* Gewinntabellen: Auf dem Handy bleibt nur das Symbolbild stehen (der Name bleibt für
+     Screenreader im Text), damit alle vier Betragsspalten ohne Seitwärts-Scrollen passen. */
+  .gewinn-tabelle{min-width:0;font-size:.8rem}
+  .gewinn-tabelle th,.gewinn-tabelle td{padding:6px 3px}
+  .gewinn-tabelle thead th{font-size:.62rem;letter-spacing:.04em}
+  .symbol-name span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+}

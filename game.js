@@ -66,7 +66,22 @@
       "tempelschatz") sammelt die höchsten NETTO-Gewinne einer Runde und wird
       STILL gefüllt, es gibt keinen Gewinn-Dialog.
 
-   AUSZAHLUNGSQUOTE (RTP) – EXAKT UND SIMULIERT
+   STAND 2026-10-23: FREISPIEL-MULTIPLIKATOR (die Zahlen weiter unten sind der Stand VORHER)
+   Freispiele starten mit ×1, jede Expansion mit Auszahlung erhöht den Multiplikator für die
+   FOLGENDEN Freispiele um 1 (MULTI_MAX = 5, multiNachFreispiel). Er gilt für Linien und Expansion,
+   nicht für den Scatter, und überlebt Wiederauslösung und Neuladen (Rundenstand "multi").
+   Damit die RTP nicht explodiert, sind die Expansionsquoten etwa halbiert (EXPANSIONSQUOTEN,
+   Falke 30/150/600, Pharao 2: 10, 3: 150, 4: 600, 5: 2500). Linienquoten und Bänder unverändert.
+     Grundspiel exakt (rtpExaktBerechnen, unverändert)  52,57 %
+     Ø Expansion je Freispiel bei ×1                   1,87 x Einsatz (vorher 4,02)
+     rtpExaktBerechnen().rtp rechnet die Freispiele OHNE Multiplikator (22,4 %) und ist damit
+     für die Gesamt-RTP nicht mehr gültig, nur noch für das Grundspiel.
+   Simulation (scratchpad sim_tempel.mjs, rundeSimulieren, mulberry32, Einsatz 10):
+     48.000.000 Runden          RTP 98,71 %   davon Freispiele 46,12 %
+     Einzelläufe                97,86 % bis 100,48 %, Einsatz 25 / 100 ebenfalls rund 98,5 %
+     höchste Runden-Auszahlung  5.072 Einsätze
+
+   AUSZAHLUNGSQUOTE (RTP) – EXAKT UND SIMULIERT (Stand bis 2026-10-22, ohne Multiplikator)
    Zahlen für GENAU diese Bänder und Quoten (Gesamteinsatz = 1). Die Abstimmung zielt auf eine
    RTP von 95,0 % (Korridor 94,5 bis 95,5 %), also leicht über den üblichen Werten echter Geräte,
    und auf eine spürbar höhere Trefferquote im Grundspiel (rund 30 % statt vorher 24 %). Erreicht wurde
@@ -145,6 +160,7 @@ import {
 } from "./assets/klang.js";
 import { linienAnzeigeBauen, linienFarbe } from "./assets/gewinnlinien.js";
 import { lade, speichere, entferne } from "./assets/storage.js";
+import { autoDrehEinrichten } from "./assets/autodreh.js";
 import {
   STARTGELD,
   kontostand,
@@ -439,21 +455,34 @@ export const LINIENQUOTEN = {
  * Fehlt ein Eintrag (z. B. nur 2 Walzen bei einem Niedrigsymbol), zahlt die
  * Expansion nichts – das Symbol expandiert trotzdem, nur ohne Gewinn.
  */
+// Seit 2026-10-23 halbiert (vorher Zehn/Bube 1/2/8, Dame 4/16/60, König 5/20/80, Ass 46/200/700,
+// Skarabäus 60/280/1000, Falke 70/350/1500, Pharao 30/350/1500/6000), weil der Freispiel-Multiplikator
+// (bis ×5) dazukam. Halbe Quoten ergeben bei Einsatz 25 krumme Beträge -> expansionAuswerten rundet.
 export const EXPANSIONSQUOTEN = {
-  [ZEH]: { 3: 1, 4: 2, 5: 8 },
-  [BUB]: { 3: 1, 4: 2, 5: 8 },
-  [DAM]: { 3: 4, 4: 16, 5: 60 },
-  [KOE]: { 3: 5, 4: 20, 5: 80 },
-  [ASS]: { 3: 46, 4: 200, 5: 700 },
-  [SKA]: { 3: 60, 4: 280, 5: 1000 },
-  [FAL]: { 3: 70, 4: 350, 5: 1500 },
-  [PHA]: { 2: 30, 3: 350, 4: 1500, 5: 6000 },
+  [ZEH]: { 3: 0.5, 4: 1, 5: 4 },
+  [BUB]: { 3: 0.5, 4: 1, 5: 4 },
+  [DAM]: { 3: 2, 4: 8, 5: 30 },
+  [KOE]: { 3: 2.5, 4: 10, 5: 40 },
+  [ASS]: { 3: 23, 4: 100, 5: 350 },
+  [SKA]: { 3: 30, 4: 140, 5: 500 },
+  [FAL]: { 3: 30, 4: 150, 5: 600 }, // Falke und Pharao etwas stärker gesenkt (Ziel-RTP knapp 99 %)
+  [PHA]: { 2: 10, 3: 150, 4: 600, 5: 2500 },
 };
 
 export const SCATTER_MINDESTANZAHL = 3; // so viele Tempeltore braucht der Scatter-Gewinn + Freispiele
 export const SCATTER_QUOTE = 2; // Vielfaches des Gesamteinsatzes
 export const FREISPIELE_PRO_AUSLOESUNG = 10;
 export const EXPANSION_MINDESTVORKOMMEN = 2; // so oft muss das Spezialsymbol im Sichtfeld liegen
+
+/* Freispiel-Multiplikator (seit 2026-10-23): startet in jeder Serie bei ×1. Jedes Freispiel, in dem
+   die EXPANSION etwas zahlt, hebt ihn für die FOLGENDEN Freispiele um 1, höchstens MULTI_MAX.
+   Er vervielfacht Linien- und Expansionsgewinne der Freispiele, nicht den Scatter-Gewinn. */
+export const MULTI_MAX = 5;
+
+/** Nächster Multiplikator nach einem Freispiel (`gewonnen` = die Expansion zahlte). */
+export function multiNachFreispiel(multi, gewonnen) {
+  return gewonnen ? Math.min(MULTI_MAX, multi + 1) : multi;
+}
 
 /** Ab wie vielen gleichen Symbolen von links zahlt eine Linie? Pharao ab 2, alle anderen ab 3. */
 export function mindestAnzahl(symbol) {
@@ -575,7 +604,7 @@ export function expansionAuswerten(feld, symbol, einsatz) {
     walzen,
     anzahl: walzen.length,
     quote,
-    betrag: quote * einsatz,
+    betrag: Math.round(quote * einsatz),
   };
 }
 
@@ -586,13 +615,17 @@ export function expansionAuswerten(feld, symbol, einsatz) {
  *   3. Expansion (nur wenn ein Spezialsymbol übergeben wird)
  * Die Summe ist die Brutto-Auszahlung dieses einen Zugs.
  */
-export function spielzugAuswerten(feld, einsatz, spezialSymbol = null) {
+export function spielzugAuswerten(feld, einsatz, spezialSymbol = null, multi = 1) {
   const liniengewinne = liniengewinneAuswerten(feld, einsatz);
-  const liniensumme = liniengewinne.reduce((summe, g) => summe + g.betrag, 0);
+  const linienBasis = liniengewinne.reduce((summe, g) => summe + g.betrag, 0);
   const scatter = scatterAuswerten(feld, einsatz);
   const expansion = expansionAuswerten(feld, spezialSymbol, einsatz);
-  const summe = liniensumme + scatter.betrag + (expansion ? expansion.betrag : 0);
-  return { feld, liniengewinne, liniensumme, scatter, expansion, summe };
+  const expansionBasis = expansion ? expansion.betrag : 0;
+  // Multiplikator (nur Freispiele, sonst 1): auf Linien und Expansion, nicht auf den Scatter
+  const liniensumme = linienBasis * multi;
+  const summe = liniensumme + scatter.betrag + expansionBasis * multi;
+  const gewonnen = expansionBasis > 0; // nur Expansions-Gewinne heben den Multiplikator
+  return { feld, liniengewinne, liniensumme, scatter, expansion, summe, multi, gewonnen };
 }
 
 /**
@@ -650,7 +683,7 @@ export function zufallsSpezialSymbol(zufall = Math.random) {
    damit die simulierte RTP wirklich zum echten Spiel gehört. */
 
 export function neueRunde(einsatz) {
-  return { einsatz, bisher: 0, uebrig: 0, symbol: null, gespielt: 0 };
+  return { einsatz, bisher: 0, uebrig: 0, symbol: null, gespielt: 0, multi: 1 };
 }
 
 /**
@@ -662,12 +695,18 @@ export function spielzugDurchfuehren(runde, zufall = Math.random, baender = WALZ
   const istFreispiel = runde.uebrig > 0;
   const stopps = zufallsStopps(baender, zufall);
   const feld = sichtfeldAusStopps(stopps, baender);
-  const ergebnis = spielzugAuswerten(feld, runde.einsatz, istFreispiel ? runde.symbol : null);
+  const ergebnis = spielzugAuswerten(
+    feld,
+    runde.einsatz,
+    istFreispiel ? runde.symbol : null,
+    istFreispiel ? runde.multi : 1,
+  );
 
   runde.bisher += ergebnis.summe;
   if (istFreispiel) {
     runde.uebrig -= 1;
     runde.gespielt += 1;
+    runde.multi = multiNachFreispiel(runde.multi, ergebnis.gewonnen);
   }
   const neueFreispiele = ergebnis.scatter.freispiele;
   if (neueFreispiele > 0) {
@@ -702,6 +741,7 @@ export function rundeSimulieren(einsatz = 10, zufall = Math.random, baender = WA
     ausgeloest,
     nachladen,
     symbol: runde.symbol,
+    multi: runde.multi,
   };
 }
 
@@ -719,7 +759,10 @@ export function freispielStandPruefen(roh) {
   if (!Number.isInteger(bisher) || bisher < 0 || bisher > 1e9) return null;
   const gespieltSauber =
     Number.isInteger(gespielt) && gespielt >= 0 && gespielt <= 1e6 ? gespielt : 0;
-  return { einsatz, bisher, uebrig, symbol, gespielt: gespieltSauber };
+  // Stände von vor 2026-10-23 haben keinen Multiplikator -> ×1
+  const multi =
+    Number.isInteger(roh.multi) && roh.multi >= 1 && roh.multi <= MULTI_MAX ? roh.multi : 1;
+  return { einsatz, bisher, uebrig, symbol, gespielt: gespieltSauber, multi };
 }
 
 /**
@@ -1077,6 +1120,8 @@ function starteSpiel() {
   const bannerName = document.getElementById("banner-name");
   const bannerUebrig = document.getElementById("banner-uebrig");
   const bannerGewinn = document.getElementById("banner-gewinn");
+  const bannerMulti = document.getElementById("banner-multi");
+  let gezeigterMulti = 1;
   const gewinnAnzeige = document.getElementById("gewinn-anzeige");
   const drehInfo = document.getElementById("dreh-info");
   const hudLetzter = document.getElementById("hud-letzter");
@@ -1097,6 +1142,7 @@ function starteSpiel() {
 
   // ----- Spielzustand -----
   let laeuft = false; // true, solange gedreht wird (auch durch alle Freispiele): alles gesperrt
+  let autoDreh = null; // Auto-Drehen (assets/autodreh.js), wird beim Start eingerichtet
   let stopps = zufallsStopps(); // aktuelle Stopp-Indizes (Startbild: zufällig, hat keinen Einfluss aufs Geld)
   /* runde = die aktuelle Runde (siehe neueRunde) oder null. Zusätzlich merkt sie sich
      "abgerechnet", damit das Geld nie doppelt gutgeschrieben wird. Ist runde gesetzt
@@ -1191,19 +1237,27 @@ function starteSpiel() {
     chipKnoepfe.forEach((chip) => {
       const wert = Number(chip.dataset.einsatz);
       chip.setAttribute("aria-pressed", String(wert === wirksam));
-      chip.disabled = laeuft || runde !== null || wert > stand; // gesperrt beim Drehen, in Freispielen oder wenn zu teuer
+      chip.disabled = laeuft || Boolean(autoDreh?.aktiv()) || runde !== null || wert > stand; // gesperrt beim Drehen, in Freispielen oder wenn zu teuer
     });
     drehKnopf.textContent = wartetAufFortsetzung ? "FREISPIELE FORTSETZEN" : "DREHEN";
-    drehKnopf.disabled = laeuft || (runde === null && wirksam === 0);
-    resetKnopf.disabled = laeuft;
-    kontoResetKnopf.disabled = laeuft;
+    drehKnopf.disabled = laeuft || Boolean(autoDreh?.aktiv()) || (runde === null && wirksam === 0);
+    resetKnopf.disabled = laeuft || Boolean(autoDreh?.aktiv());
+    kontoResetKnopf.disabled = laeuft || Boolean(autoDreh?.aktiv());
     const proLinie = (wirksam || gewaehlterEinsatz) / ANZAHL_LINIEN;
     linienEinsatzInfo.textContent = `Gesamteinsatz für alle 10 Linien, das sind ${proLinie.toLocaleString("de-DE")} pro Linie.`;
     tabelleBetraegeAktualisieren();
+    autoDreh?.aktualisieren();
   }
 
   function einsatzWaehlen(wert) {
-    if (laeuft || runde || !EINSATZSTUFEN.includes(wert) || wert > kontostand()) return;
+    if (
+      laeuft ||
+      autoDreh?.aktiv() ||
+      runde ||
+      !EINSATZSTUFEN.includes(wert) ||
+      wert > kontostand()
+    )
+      return;
     gewaehlterEinsatz = wert;
     speichere(SPIEL, "einsatz", wert);
     steuerungAktualisieren();
@@ -1314,11 +1368,20 @@ function starteSpiel() {
    * Zahlen im Banner und im HUD. `verborgen` = Freispiele, die der laufende Zug gerade
    * erst gewonnen hat (Wiederauslösung): Sie werden erst nach der Animation mitgezählt.
    */
-  function bannerAktualisieren(verborgen = 0) {
+  function bannerAktualisieren(verborgen = 0, multi = runde.multi ?? 1) {
     const sichtbar = runde.uebrig - verborgen;
     bannerUebrig.textContent = String(sichtbar);
     bannerGewinn.textContent = zahlText(gezeigterGewinn);
     hudFreispiele.textContent = String(sichtbar);
+    // Multiplikator: `multi` gilt für das NÄCHSTE Freispiel (während eines Zugs: für diesen Zug)
+    bannerMulti.textContent = `×${multi}`;
+    bannerMulti.classList.toggle("aktiv", multi > 1);
+    if (multi > gezeigterMulti) {
+      bannerMulti.classList.remove("hoch");
+      void bannerMulti.offsetWidth; // Animation neu starten
+      bannerMulti.classList.add("hoch");
+    }
+    gezeigterMulti = multi;
   }
 
   /** Setzt das Spezialsymbol im Banner (Grafik + Name). */
@@ -1648,7 +1711,7 @@ function starteSpiel() {
    * (2) von links nach rechts füllt das Symbol jede betroffene Walze komplett
    * (kurzes Aufdecken), (3) die ausgefüllten Walzen leuchten für den Zusatzgewinn.
    */
-  async function expansionZeigen(expansion) {
+  async function expansionZeigen(expansion, multi = 1) {
     const reduziert = bewegungReduziert();
     const feld = sichtfeldAusStopps(stopps);
     const positionen = [];
@@ -1673,7 +1736,8 @@ function starteSpiel() {
     await warte(reduziert ? 100 : 500);
     drehInfo.textContent =
       expansion.betrag > 0
-        ? `${expansion.anzahl} × ${SYMBOL_NAMEN[expansion.symbol]} auf allen 10 Linien: +${zahlText(expansion.betrag)}`
+        ? `${expansion.anzahl} × ${SYMBOL_NAMEN[expansion.symbol]} auf allen 10 Linien: +${zahlText(expansion.betrag * multi)}` +
+          (multi > 1 ? ` (×${multi})` : "")
         : "Das Symbol expandiert, aber für eine Auszahlung reichen die Walzen nicht.";
     await warte(reduziert ? 150 : 1100);
   }
@@ -1683,13 +1747,17 @@ function starteSpiel() {
     const teile = [];
     if (e.liniengewinne.length > 0) {
       teile.push(
-        `${e.liniengewinne.length} ${e.liniengewinne.length === 1 ? "Gewinnlinie" : "Gewinnlinien"}: +${zahlText(e.liniensumme)}`,
+        `${e.liniengewinne.length} ${e.liniengewinne.length === 1 ? "Gewinnlinie" : "Gewinnlinien"}: +${zahlText(e.liniensumme)}` +
+          (e.multi > 1 ? ` (×${e.multi})` : ""),
       );
     }
     if (e.scatter.ausgeloest)
       teile.push(`${e.scatter.anzahl} Tempeltore: +${zahlText(e.scatter.betrag)}`);
     if (e.expansion && e.expansion.betrag > 0)
-      teile.push(`Expansion: +${zahlText(e.expansion.betrag)}`);
+      teile.push(
+        `Expansion: +${zahlText(e.expansion.betrag * e.multi)}${e.multi > 1 ? ` (×${e.multi})` : ""}`,
+      );
+    if (e.gewonnen && e.multi < MULTI_MAX) teile.push(`Multiplikator steigt auf ×${e.multi + 1}`);
     return teile.length > 0 ? teile.join(" · ") : "Leider kein Treffer.";
   }
 
@@ -1717,6 +1785,7 @@ function starteSpiel() {
       uebrig: runde.uebrig,
       symbol: runde.symbol,
       gespielt: runde.gespielt,
+      multi: runde.multi ?? 1,
     });
   }
 
@@ -1791,8 +1860,8 @@ function starteSpiel() {
     const e = zug.ergebnis;
     freispieleSichern();
     if (zug.istFreispiel) {
-      bannerAktualisieren(zug.neueFreispiele);
-      drehInfo.textContent = `Freispiel ${runde.gespielt} · die Walzen laufen …`;
+      bannerAktualisieren(zug.neueFreispiele, e.multi);
+      drehInfo.textContent = `Freispiel ${runde.gespielt} · die Walzen laufen …${e.multi > 1 ? ` (×${e.multi})` : ""}`;
     }
 
     await walzenLaufenLassen(zug.stopps);
@@ -1808,7 +1877,7 @@ function starteSpiel() {
     await scatterZeigen(e.scatter, zug.istFreispiel);
     const knappText = await knappZeigen(fast);
     // Schritt b) und c) Expansion mit Zusatzauswertung (nur Freispiele)
-    if (e.expansion && e.expansion.ausgeloest) await expansionZeigen(e.expansion);
+    if (e.expansion && e.expansion.ausgeloest) await expansionZeigen(e.expansion, e.multi);
 
     drehInfo.textContent =
       zugText(e) +
@@ -1891,6 +1960,7 @@ function starteSpiel() {
     if (netto >= MINDEST_NETTO_FUER_TOPLISTE && stillEintragen(SPIEL, netto) !== null) {
       seiteAktualisieren();
     }
+    return { auszahlung, netto, freispiele: hatteFreispiele }; // für das Auto-Drehen
   }
 
   /** Gibt nach einer Runde den Fokus an den Knopf zurück und prüft auf Pleite. */
@@ -1923,17 +1993,19 @@ function starteSpiel() {
     gewinnAnzeige.textContent = "";
     gewinnAnzeige.className = "gewinn-anzeige";
     drehInfo.textContent = "Die Walzen laufen …";
+    let ende = null;
     try {
       await spielzugAusfuehren();
       if (runde.uebrig > 0) {
         await freispieleEinleiten();
         await freispieleAbspielen();
       }
-      await rundeBeenden();
+      ende = await rundeBeenden();
     } finally {
       laeuft = false;
       nachRunde(fokusWar);
     }
+    return ende ? { einsatz, ...ende } : null; // für das Auto-Drehen
   }
 
   /** Gesicherte Freispiele (nach Seitenwechsel) fortsetzen. */
@@ -1981,7 +2053,8 @@ function starteSpiel() {
       // (anklicken). Dort NICHT zusätzlich drehen, sonst würde es doppelt ausgelöst.
       if (tag === "BUTTON" || tag === "A" || tag === "SUMMARY") return;
       e.preventDefault(); // Seite nicht scrollen
-      knopfAktion();
+      if (autoDreh?.aktiv()) autoDreh.stoppen();
+      else knopfAktion();
     } else if (/^[1-9]$/.test(e.key) && Number(e.key) <= EINSATZSTUFEN.length) {
       einsatzWaehlen(EINSATZSTUFEN[Number(e.key) - 1]); // Taste 1 = erster Chip, 2 = zweiter …
     }
@@ -2037,11 +2110,28 @@ function starteSpiel() {
     gezeigterGewinn = runde.bisher;
     freispielModusSetzen(true);
     freispielGewinnAnzeigen();
-    drehInfo.textContent = `Gesicherte Freispiele warten: ${runde.uebrig} übrig, Spezialsymbol ${SYMBOL_NAMEN[runde.symbol]}.`;
+    gezeigterMulti = runde.multi;
+    bannerAktualisieren();
+    drehInfo.textContent = `Gesicherte Freispiele warten: ${runde.uebrig} übrig, Spezialsymbol ${SYMBOL_NAMEN[runde.symbol]}, Multiplikator ×${runde.multi}.`;
   } else {
     entferne(SPIEL, "freispiele"); // ungültigen Rest aufräumen
   }
 
+  autoDreh = autoDrehEinrichten({
+    spiel: SPIEL,
+    drehKnopf,
+    drehen,
+    bereit: () =>
+      !laeuft &&
+      runde === null &&
+      wirksamerEinsatz() > 0 &&
+      !document.querySelector("dialog[open]"),
+    hatFreispiele: true,
+    melden: (text) => {
+      drehInfo.textContent = text;
+    },
+    beiAenderung: steuerungAktualisieren,
+  });
   steuerungAktualisieren();
   seiteAktualisieren();
   if (!runde && istPleite(EINSATZSTUFEN[0])) pleiteDialogZeigen(); // z. B. nach Seitenwechsel mit leerem Konto

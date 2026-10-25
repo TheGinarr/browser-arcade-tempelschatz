@@ -3,17 +3,21 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="theme-color" content="#07070f" />
+    <meta name="theme-color" content="#07070f" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f2f3f9" media="(prefers-color-scheme: light)" />
     <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="./assets/style.css" />
+    <script src="./assets/thema.js?v=20261024"></script>
+    <link rel="stylesheet" href="./assets/style.css?v=20261024w" />
     <!-- Gewinnlinien-Tabs und Linien-Vorschau (gemeinsam mit Angelglück, Skript: ../assets/gewinnlinien.js) -->
     <link rel="stylesheet" href="./assets/gewinnlinien.css" />
     <!-- spielspezifische Styles (Walzenfenster, Gewinnlinien, Freispiel-Banner, Tabellen) – das gemeinsame Design bleibt in ../assets/style.css -->
-    <link rel="stylesheet" href="./spiel.css" />
+    <link rel="stylesheet" href="./spiel.css?v=20261024t" />
+    <link rel="stylesheet" href="./assets/autodreh.css?v=20261020" />
+    <link rel="stylesheet" href="./assets/kabinett.css?v=20261024" />
     <title>Tempelschatz · Browser-Arcade</title>
     <meta
       name="description"
-      content="Tempelschatz mit Spielgeld: ein Ägypten-Slot mit fünf Walzen, zehn Gewinnlinien und Freispielen mit expandierendem Symbol. Lerne nebenbei, wie Linien, Scatter und die Auszahlungsquote (RTP) funktionieren. Ohne Konto und Cookies."
+      content="Tempelschatz mit Spielgeld: ein Ägypten-Slot mit fünf Walzen, zehn Gewinnlinien und Freispielen mit expandierendem Symbol. Lerne nebenbei, wie Linien, Scatter und die Auszahlungsquote (RTP) funktionieren. Ohne Konto und ohne eigene Cookies."
     />
   </head>
   <body style="--ak: var(--gold)">
@@ -504,7 +508,23 @@
         </div>
       </div>
 
-      <div class="buehne" id="buehne">
+      <div class="buehne kabinett kabinett-tempel" id="buehne">
+        <div class="kab-topper" aria-hidden="true">
+          <svg viewBox="0 0 96 48" aria-hidden="true">
+            <path d="M48 4 84 18H12z" fill="#e3b23c" stroke="#7a4a12" stroke-width="2" />
+            <rect x="14" y="18" width="68" height="5" fill="#c9952c" />
+            <rect x="20" y="23" width="7" height="19" fill="#e9c46a" stroke="#7a4a12" />
+            <rect x="36" y="23" width="7" height="19" fill="#e9c46a" stroke="#7a4a12" />
+            <rect x="53" y="23" width="7" height="19" fill="#e9c46a" stroke="#7a4a12" />
+            <rect x="69" y="23" width="7" height="19" fill="#e9c46a" stroke="#7a4a12" />
+            <rect x="10" y="42" width="76" height="5" fill="#c9952c" stroke="#7a4a12" />
+            <circle cx="48" cy="12" r="3" fill="#3ee0a0" />
+            <path class="kab-flamme" d="M4 30q-3-6 2-12 1 6 3 4 2 4-1 8z" fill="#ff9a2f" />
+            <rect x="3" y="30" width="4" height="14" fill="#6b3d12" />
+            <path class="kab-flamme" d="M90 30q-3-6 2-12 1 6 3 4 2 4-1 8z" fill="#ff9a2f" />
+            <rect x="89" y="30" width="4" height="14" fill="#6b3d12" /></svg
+          ><span class="kab-titel">TEMPELSCHATZ</span>
+        </div>
         <!-- Freispiel-Banner: zeigt das gezogene Spezialsymbol, die übrigen Freispiele und den Rundengewinn. Nur in Freispielen sichtbar. -->
         <div class="freispiel-banner" id="freispiel-banner" hidden>
           <div class="banner-symbol" id="banner-symbol" aria-hidden="true"></div>
@@ -513,6 +533,7 @@
           </div>
           <div class="banner-zahlen">
             <span>Übrig<b id="banner-uebrig">0</b></span
+            ><span>Multi<b id="banner-multi">×1</b></span
             ><span>Gewinn<b id="banner-gewinn">0</b></span>
           </div>
         </div>
@@ -652,9 +673,7 @@
       </div>
 
       <section style="max-width: 420px; margin-top: 36px">
-        <h2 style="font-family: var(--pixel); font-weight: 400; font-size: 0.85rem">
-          Lokale Top 3
-        </h2>
+        <h2 style="font-family: var(--pixel); font-weight: 400; font-size: 0.85rem">Topliste</h2>
         <p class="klein">
           Die höchsten Netto-Gewinne einzelner Runden (Auszahlung minus Einsatz, inklusive aller
           Freispiele daraus).
@@ -723,6 +742,13 @@
               bringen 10 weitere Freispiele.
             </li>
             <li>
+              <strong>Freispiel-Multiplikator:</strong> Die Freispiele starten mit ×1. Jede
+              Expansion, die etwas auszahlt, erhöht den Multiplikator für die folgenden Freispiele
+              um 1, höchstens bis ×5 (Anzeige „Multi“ im Banner). Er gilt für Linien- und
+              Expansionsgewinne, nicht für den Scatter. Er bleibt für den Rest der Runde, auch über
+              eine Wiederauslösung hinweg.
+            </li>
+            <li>
               Der Gewinn aus der ganzen Runde (auslösender Dreh plus alle Freispiele) wird am Ende
               gutgeschrieben. Verlässt du die Seite mitten in den Freispielen, werden sie gesichert
               und beim nächsten Besuch fortgesetzt.
@@ -778,10 +804,11 @@
               probier es mit dem Ton-Knopf aus.
             </li>
             <li>
-              <strong>Der Freispiel-Traum:</strong> Ein Bonus ist im Mittel rund 50 Einsätze wert
+              <strong>Der Freispiel-Traum:</strong> Ein Bonus ist im Mittel rund 54 Einsätze wert
               und macht fast die Hälfte der gesamten Auszahlung aus, kommt aber nur etwa alle 117
-              Drehs. Der seltene große Treffer bleibt im Kopf, die vielen Drehs dazwischen
-              verblassen.
+              Drehs. Der steigende Multiplikator sorgt dafür, dass ein Bonus mal fast nichts und mal
+              das Hundertfache bringt. Der seltene große Treffer bleibt im Kopf, die vielen Drehs
+              dazwischen verblassen.
             </li>
           </ul>
           <p><strong>Das tun wir bewusst nicht (echte Geräte schon):</strong></p>
@@ -893,9 +920,11 @@
             viel vom Einsatz kommt auf lange Sicht zurück? Hier gibt es 30 × 30 × 30 × 30 × 30 =
             24.300.000 gleich wahrscheinliche Stopp-Kombinationen.
             <code>rtpExaktBerechnen()</code> geht alle einmal durch (in Node dauert das rund eine
-            Minute) und liefert (die Quoten sind auf eine RTP von 95,0 % abgestimmt, und mit mehr
-            niedrigen Symbolen im Band fällt im Grundspiel öfter ein kleiner Treffer: Die
-            Trefferquote liegt bei 30,4 %, 56 % dieser Treffer zahlen weniger als der Einsatz):
+            Minute) und liefert das Grundspiel exakt (mit mehr niedrigen Symbolen im Band fällt
+            öfter ein kleiner Treffer: Die Trefferquote liegt bei 30,4 %, 56 % dieser Treffer zahlen
+            weniger als der Einsatz). Seit dem Freispiel-Multiplikator (2026-10-23) hängt jedes
+            Freispiel vom Verlauf der Runde ab, deshalb kommt der Freispiel-Anteil aus der
+            Simulation. Insgesamt liegt die RTP bei rund 98,7 %:
           </p>
           <table class="rtp-tabelle">
             <thead>
@@ -922,22 +951,22 @@
                 <td>52,58 %</td>
               </tr>
               <tr>
-                <th scope="row">Freispiele (inkl. Wiederauslösung)</th>
-                <td>42,51 %</td>
-                <td>42,53 %</td>
+                <th scope="row">Freispiele (inkl. Multiplikator und Wiederauslösung)</th>
+                <td>–</td>
+                <td>46,12 %</td>
               </tr>
               <tr class="summe">
                 <th scope="row">RTP gesamt</th>
-                <td>95,08 %</td>
-                <td>95,11 %</td>
+                <td>–</td>
+                <td>98,71 %</td>
               </tr>
             </tbody>
           </table>
           <p>
-            Die Freispiel-Zeile folgt aus einer kleinen Rechnung. Ein Tempeltor-Dreh passiert mit
-            der Wahrscheinlichkeit p = 0,856 % (1 von 117 Drehs). Ein Freispiel bringt im Mittel
-            Linien + Scatter + Expansion. Die Expansion hängt vom gezogenen Symbol ab (Durchschnitt
-            über alle 8 Symbole: 4,02 × Gesamteinsatz pro Freispiel):
+            Ein Tempeltor-Dreh passiert mit der Wahrscheinlichkeit p = 0,856 % (1 von 117 Drehs).
+            Ein Freispiel bringt bei ×1 im Mittel Linien + Scatter + Expansion. Die Expansion hängt
+            vom gezogenen Symbol ab (Durchschnitt über alle 8 Symbole: 1,87 × Gesamteinsatz pro
+            Freispiel, noch ohne Multiplikator):
           </p>
           <table class="rtp-tabelle">
             <thead>
@@ -955,28 +984,29 @@
             <tbody>
               <tr>
                 <th scope="row">Expansion je Freispiel</th>
-                <td>2,37</td>
-                <td>2,76</td>
-                <td>3,51</td>
-                <td>3,86</td>
-                <td>5,18</td>
-                <td>6,30</td>
-                <td>5,76</td>
+                <td>1,19</td>
+                <td>1,38</td>
+                <td>1,75</td>
+                <td>1,93</td>
+                <td>2,59</td>
+                <td>2,69</td>
+                <td>2,24</td>
               </tr>
             </tbody>
           </table>
           <p>
             Weil in den Freispielen erneut 3 Tempeltore fallen können, kommen pro Auslösung im
             Schnitt <code>10 / (1 − 10 · p)</code> = 10,94 Freispiele zusammen (eine geometrische
-            Reihe). Der Freispiel-Anteil ist dann
+            Reihe). Ohne Multiplikator wäre der Freispiel-Anteil
             <code>p × 10,94 × (Grundspiel-Anteil + Expansion)</code> = 0,00856 × 10,94 × (0,5257 +
-            4,0154) = 42,51 %. Fast die Hälfte der Auszahlung steckt also im Bonus, im Mittel ist
-            ein Bonus rund 50 Einsätze wert. Die Simulation (<code>rundeSimulieren()</code>, 120
-            Millionen Runden inklusive aller Freispiele) bestätigt das: Gesamt 95,11 %, die
-            Einzelläufe mit je 5 Millionen Runden liegen zwischen 93,5 % und 96,0 %. Dass sie
-            streuen, liegt an den seltenen Riesengewinnen der Pharao-Maske: Hohe Quoten mit winziger
-            Chance verlangen sehr viele Runden, bis der Durchschnitt zur Ruhe kommt. Einen einzelnen
-            Abend sagt die RTP ohnehin nicht voraus.
+            1,8698) = 22,4 %. Der Multiplikator (+1 nach jeder zahlenden Expansion, bis ×5)
+            verdoppelt das im Mittel ungefähr: Die Simulation (<code>rundeSimulieren()</code>, 48
+            Millionen Runden inklusive aller Freispiele) ergibt 46,1 % für die Freispiele und 98,7 %
+            gesamt, im Mittel ist ein Bonus rund 54 Einsätze wert. Die Einzelläufe liegen zwischen
+            97,9 % und 100,5 %. Dass sie streuen, liegt an den seltenen Riesengewinnen der
+            Pharao-Maske mit hohem Multiplikator (höchste Runde in der Simulation: rund 5.000
+            Einsätze): Hohe Quoten mit winziger Chance verlangen sehr viele Runden, bis der
+            Durchschnitt zur Ruhe kommt. Einen einzelnen Abend sagt die RTP ohnehin nicht voraus.
           </p>
 
           <p>
@@ -1044,6 +1074,6 @@
         </nav>
       </div>
     </footer>
-    <script type="module" src="./game.js"></script>
+    <script type="module" src="./game.js?v=20261023"></script>
   </body>
 </html>

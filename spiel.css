@@ -102,6 +102,30 @@
   text-transform: none;
   color: var(--txt);
 }
+/* Freispiel-Multiplikator (seit 2026-10-23): golden, sobald er über ×1 liegt, pulsiert beim Aufstieg */
+#banner-multi.aktiv {
+  color: var(--gold);
+}
+#banner-multi.hoch {
+  animation: multi-hoch 0.9s ease-out;
+}
+@keyframes multi-hoch {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.5);
+    text-shadow: 0 0 12px var(--gold);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #banner-multi.hoch {
+    animation: none;
+  }
+}
 
 /* ---------- Walzenfenster ---------------------------------------- */
 /* Fünf gleich breite Spalten (Grid). Jede Walze ist dreimal so hoch wie breit
@@ -508,7 +532,7 @@
   margin-top: 10px;
 }
 .einsatz-label {
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--mut);
@@ -583,7 +607,7 @@
   border-bottom: 1px solid var(--line);
 }
 .gewinn-tabelle thead th {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--mut);
@@ -612,7 +636,7 @@
 }
 .gewinn-tabelle .quote {
   display: block;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   color: var(--mut);
 }
 .symbol-name {
@@ -716,7 +740,7 @@
   border-bottom: 1px solid var(--line);
 }
 .rtp-tabelle thead th {
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -761,7 +785,7 @@
     padding: 6px 3px;
   }
   .gewinn-tabelle thead th {
-    font-size: 0.62rem;
+    font-size: 0.75rem;
     letter-spacing: 0.04em;
   }
   .symbol-name span {
